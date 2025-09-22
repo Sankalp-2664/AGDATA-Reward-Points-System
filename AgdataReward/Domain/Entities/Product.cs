@@ -27,7 +27,8 @@ namespace Domain.Entities
             Stock--;
         }
 
-        public void IncreaseStock(int amount)
+        //keep internal so only admin can edit it
+        internal void IncreaseStock(int amount)
         {
             if (amount <= 0) throw new ArgumentException("Amount must be positive");
             Stock += amount;

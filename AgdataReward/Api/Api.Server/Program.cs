@@ -1,41 +1,28 @@
+using Application.Interfaces;
+using Infrastructure.Services;
 
-namespace Api.Server
+var builder = WebApplication.CreateBuilder(args);
+
+// framework services
+builder.Services.AddControllers();
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen();
+
+// your own services
+builder.Services.AddSingleton<IUserService, UserService>();
+builder.Services.AddSingleton<IEventService, EventService>();
+builder.Services.AddSingleton<IProductService, ProductService>();
+builder.Services.AddSingleton<IRedemptionService, RedemptionService>();
+
+var app = builder.Build();
+
+if (app.Environment.IsDevelopment())
 {
-    public class Program
-    {
-        public static void Main(string[] args)
-        {
-            var builder = WebApplication.CreateBuilder(args);
-
-            // Add services to the container.
-
-            builder.Services.AddControllers();
-            // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
-            builder.Services.AddEndpointsApiExplorer();
-            builder.Services.AddSwaggerGen();
-
-            var app = builder.Build();
-
-            app.UseDefaultFiles();
-            app.UseStaticFiles();
-
-            // Configure the HTTP request pipeline.
-            if (app.Environment.IsDevelopment())
-            {
-                app.UseSwagger();
-                app.UseSwaggerUI();
-            }
-
-            app.UseHttpsRedirection();
-
-            app.UseAuthorization();
-
-
-            app.MapControllers();
-
-            app.MapFallbackToFile("/index.html");
-
-            app.Run();
-        }
-    }
+    app.UseSwagger();
+    app.UseSwaggerUI();
 }
+
+app.UseHttpsRedirection();
+app.UseAuthorization();
+app.MapControllers();
+app.Run();

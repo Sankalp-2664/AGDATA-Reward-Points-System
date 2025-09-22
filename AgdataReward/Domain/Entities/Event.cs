@@ -40,5 +40,19 @@ namespace Domain.Entities
                 user.ParticipateInEvent(this);
             }
         }
+
+        public void UpdateDetails(string eventName, string description, int pointsReward, DateTime startDate, DateTime endDate)
+        {
+            if (string.IsNullOrWhiteSpace(eventName)) throw new ArgumentException("Event name is required.");
+            if (pointsReward <= 0) throw new ArgumentException("Reward points must be positive.");
+            if (startDate >= endDate) throw new ArgumentException("Start date must be before end date.");
+
+            EventName = eventName;
+            Description = description;
+            PointsReward = pointsReward;
+            StartDate = startDate;
+            EndDate = endDate;
+        }
+
     }
 }

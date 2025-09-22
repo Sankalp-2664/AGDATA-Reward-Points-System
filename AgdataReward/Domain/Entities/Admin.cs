@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.Design.Serialization;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -24,10 +25,13 @@ namespace Domain.Entities
             user.ParticipateInEvent(new Event(0, "Manual Points Assignment", "", points, DateTime.Now, DateTime.Now));
         }
 
-        public void ManageProducts(Product product, int newStock)
+        // incresae quantity by newstock
+        public void AddStock(Product product, int quantity)
         {
             if (product == null) throw new ArgumentNullException(nameof(product));
-            product.IncreaseStock(newStock);
+            if (quantity <= 0) throw new ArgumentException("Quantity must be positive");
+
+            product.IncreaseStock(quantity);
         }
 
         public void ViewAllTransactions(IEnumerable<PointsTransaction> transactions)

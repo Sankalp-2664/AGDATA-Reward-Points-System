@@ -15,7 +15,7 @@ namespace Domain.Entities
         public DateTime StartDate { get; private set; }
         public DateTime EndDate { get; private set; }
 
-        private List<User> Participants { get; set; } = new List<User>();
+        private List<UserProfile> Participants { get; set; } = new List<UserProfile>();
 
         public Event(int eventId, string name, string description, int pointsReward, DateTime startDate, DateTime endDate)
         {
@@ -27,7 +27,7 @@ namespace Domain.Entities
             EndDate = endDate;
         }
 
-        public void AddParticipant(User user)
+        public void AddParticipant(UserProfile user)
         {
             if (user == null) throw new ArgumentNullException(nameof(user));
             Participants.Add(user);

@@ -8,7 +8,7 @@ using Domain.Enums;
 
 namespace Domain.Entities
 {
-    public class Admin : User
+    public class Admin : UserProfile
     {
         public Admin(int userId, string firstName, string lastName, string email)
             : base(userId, firstName, lastName, email, UserType.Admin) { }
@@ -18,7 +18,7 @@ namespace Domain.Entities
             return new Event(eventId, name, description, pointsReward, startDate, endDate);
         }
 
-        public void AssignPoints(User user, int points)
+        public void AssignPoints(UserProfile user, int points)
         {
             if (user == null) throw new ArgumentNullException(nameof(user));
             if (points <= 0) throw new ArgumentException("Points must be positive");

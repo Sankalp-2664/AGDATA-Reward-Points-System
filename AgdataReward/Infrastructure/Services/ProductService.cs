@@ -20,6 +20,8 @@ namespace Infrastructure.Services
 
             var newProduct = new Product(_nextId++, product.ProductName, product.PointsRequired, product.Stock);
             _products.Add(newProduct);
+            _nextId++;
+
             return newProduct;
         }
 

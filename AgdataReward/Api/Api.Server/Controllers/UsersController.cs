@@ -23,14 +23,14 @@ public class UsersController : ControllerBase
     }
 
     [HttpPost]
-    public IActionResult Create(User user)
+    public IActionResult Create(UserProfile user)
     {
         var newUser = _userService.AddUser(user);
         return CreatedAtAction(nameof(GetById), new { id = newUser.UserId }, newUser);
     }
 
     [HttpPut("{id:int}")]
-    public IActionResult Update(int id, User user)
+    public IActionResult Update(int id, UserProfile user)
     {
         if (id != user.UserId) return BadRequest("Id mismatch");
         var updated = _userService.UpdateUser(user);

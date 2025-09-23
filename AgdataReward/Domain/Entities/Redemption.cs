@@ -23,7 +23,7 @@ namespace Domain.Entities
 
         public void ProcessRedemption() => RedemptionDate = DateTime.UtcNow;
 
-        public bool ValidatePoints(User user, Product product)
+        public bool ValidatePoints(UserProfile user, Product product)
         {
             return user.PointsBalance >= product.PointsRequired && product.CheckAvailability();
         }

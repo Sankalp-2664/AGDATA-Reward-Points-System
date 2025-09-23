@@ -9,9 +9,9 @@ namespace Application.Interfaces
 {
     public interface IUserService
     {
-        User AddUser(User user);
-        User? GetUserById(int id);
-        IEnumerable<User> GetAllUsers();
-        User UpdateUser(User user);
+        UserProfile AddUser(UserProfile user);
+        UserProfile? GetUserById(int id);
+        IEnumerable<UserProfile> GetAllUsers();
+        UserProfile UpdateUser(UserProfile user);
     }
 }

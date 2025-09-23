@@ -8,16 +8,16 @@ namespace Infrastructure.Services
 {
     public class UserService : IUserService
     {
-        private readonly List<User> _users = new();
+        private readonly List<UserProfile> _users = new();
         private int _nextId = 1; // simple counter for UserId
 
-        public User AddUser(User user)
+        public UserProfile AddUser(UserProfile user)
         {
             if (_users.Any(u => u.Email.Equals(user.Email, StringComparison.OrdinalIgnoreCase)))
                 throw new InvalidOperationException("User with this email already exists.");
 
             //generating new ids
-            var newUser = new User(
+            var newUser = new UserProfile(
                 _nextId++,
                 user.FirstName,
                 user.LastName,
@@ -29,17 +29,17 @@ namespace Infrastructure.Services
             return newUser;
         }
 
-        public User? GetUserById(int id)
+        public UserProfile? GetUserById(int id)
         {
             return _users.FirstOrDefault(u => u.UserId == id);
         }
 
-        public IEnumerable<User> GetAllUsers()
+        public IEnumerable<UserProfile> GetAllUsers()
         {
             return _users;
         }
 
-        public User UpdateUser(User user)
+        public UserProfile UpdateUser(UserProfile user)
         {
             var existing = _users.FirstOrDefault(u => u.UserId == user.UserId);
             if (existing == null)

@@ -8,8 +8,8 @@ namespace Api.Server.Controllers;
 [Route("api/[controller]")]
 public class UsersController : ControllerBase
 {
-    private readonly IUserService _userService;
-    public UsersController(IUserService userService) => _userService = userService;
+    private readonly IUserRepository _userService;
+    public UsersController(IUserRepository userService) => _userService = userService;
 
     [HttpGet]
     public IActionResult GetAll() => Ok(_userService.GetAllUsers());

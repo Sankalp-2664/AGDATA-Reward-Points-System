@@ -9,9 +9,9 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 // your own services
-builder.Services.AddSingleton<IUserService, UserService>();
+builder.Services.AddSingleton<IUserRepository, UserService>();
 builder.Services.AddSingleton<IEventService, EventService>();
-builder.Services.AddSingleton<IProductService, ProductService>();
+builder.Services.AddSingleton<IProductRepository, ProductService>();
 builder.Services.AddSingleton<IRedemptionService, RedemptionService>();
 
 var app = builder.Build();

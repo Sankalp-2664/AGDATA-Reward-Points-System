@@ -46,7 +46,7 @@ class Program
         // -----------------------------
         // 1. Register a user
         // -----------------------------
-        var user = await userService.RegisterUserAsync("EMP001", "alice@agdata.com", "Alice", "Johnson");
+        var user = await userService.RegisterUserAsync("EMP001", "sankalp@agdata.com", "sankalp", "chakre");
         Console.WriteLine($"User registered: {user.FirstName} {user.LastName} ({user.Email})");
 
         // -----------------------------
@@ -62,7 +62,7 @@ class Program
         // -----------------------------
         // 3. Admin creates product + inventory
         // -----------------------------
-        var product = await productService.AddProductAsync("SKU001", "Coffee Mug", rp100.Id);
+        var product = await productService.AddProductAsync("SKU001", "Pen", rp100.Id);
         await inventoryService.UpdateStockAsync(product.Id, 5);
         Console.WriteLine($"Product added: {product.Name} (requires {rp100.PointsValue} points, stock 5)");
 
@@ -81,10 +81,10 @@ class Program
         Console.WriteLine($"Event created: {hackathon.Title} ({hackathon.Code})");
 
         // -----------------------------
-        // 5. Assign winner (Alice gets 1st place)
+        // 5. Assign winner 
         // -----------------------------
         await eventService.AssignWinnerAsync(instance.Id, user.Id, 1);
-        Console.WriteLine("Alice awarded 100 points for 1st place.");
+        Console.WriteLine("Sankalp awarded 100 points for 1st place.");
 
         // Check balance
         var account = await accountRepo.GetByUserIdAsync(user.Id);
@@ -97,7 +97,7 @@ class Program
         await redemptionService.ApproveRedemptionAsync(redemption.Id);
         await redemptionService.CompleteRedemptionAsync(redemption.Id);
 
-        Console.WriteLine($"Alice redeemed product: {product.Name}");
+        Console.WriteLine($"sankalp redeemed product: {product.Name}");
 
         // Check balance again
         account = await accountRepo.GetByUserIdAsync(user.Id);

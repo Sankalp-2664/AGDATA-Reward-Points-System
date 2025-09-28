@@ -46,6 +46,16 @@ namespace Application.Services
             await _ruleRepo.AddAsync(rule);
         }
 
+        public async Task<EventDefinition?> GetEventByIdAsync(Guid id)
+        {
+            return await _definitionRepo.GetByIdAsync(id);
+        }
+
+        public async Task<IEnumerable<EventDefinition>> ListEventsAsync()
+        {
+            return await _definitionRepo.ListAsync();
+        }
+
         /// <summary>
         /// eventInstanceId = EventInstance.Id (the occurrence). Assigns a winner for that occurrence.
         /// </summary>

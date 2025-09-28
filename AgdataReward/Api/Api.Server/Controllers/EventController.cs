@@ -1,4 +1,5 @@
 ﻿using Application.Interfaces;
+using Domain.Entities;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Api.Server.Controllers
@@ -21,6 +22,14 @@ namespace Api.Server.Controllers
             var ev = await _eventService.GetEventByIdAsync(id);
             if (ev == null) return NotFound();
             return Ok(ev);
+        }
+
+        // GET: api/event
+        [HttpGet]
+        public async Task<IActionResult> GetAllEvents()
+        {
+            var events = await _eventService.ListEventsAsync();
+            return Ok(events);
         }
 
         // POST: api/event

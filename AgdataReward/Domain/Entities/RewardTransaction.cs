@@ -17,6 +17,9 @@ public class RewardTransaction
 
     public RewardTransaction(Guid transactionId, Guid userId, int pointsDelta, string notes, Guid? eventId = null, Guid? redemptionId = null)
     {
+        if (pointsDelta == 0) throw new ArgumentException("PointsDelta cannot be zero.");
+        if (string.IsNullOrWhiteSpace(notes)) throw new ArgumentException("Notes cannot be empty.");
+
         TransactionId = transactionId;
         UserId = userId;
         PointsDelta = pointsDelta;

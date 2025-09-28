@@ -29,5 +29,10 @@ namespace Infrastructure.Persistence.Repositories
 
         public Task<IEnumerable<UserProfile>> ListAsync()
             => Task.FromResult<IEnumerable<UserProfile>>(_users);
+
+        public Task UpdateAsync(UserProfile user)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

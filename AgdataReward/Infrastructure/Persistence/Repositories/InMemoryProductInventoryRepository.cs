@@ -23,5 +23,11 @@ namespace Infrastructure.Persistence.Repositories
             _inventory[inventory.ProductId] = inventory;
             return Task.CompletedTask;
         }
+
+        public Task AddAsync(ProductInventory inventory)
+        {
+            _inventory[inventory.ProductId] = inventory;
+            return Task.CompletedTask;
+        }
     }
 }

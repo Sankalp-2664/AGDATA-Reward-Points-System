@@ -23,5 +23,11 @@ namespace Infrastructure.Persistence.Repositories
             _accounts[account.UserId] = account;
             return Task.CompletedTask;
         }
+
+        public Task AddAsync(UserAccount account)
+        {
+            _accounts[account.UserId] = account;
+            return Task.CompletedTask;
+        }
     }
 }

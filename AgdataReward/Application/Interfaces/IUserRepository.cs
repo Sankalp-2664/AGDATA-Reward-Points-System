@@ -14,4 +14,5 @@ public interface IUserRepository
     Task<UserProfile?> GetByEmployeeIdAsync(string employeeId);
     Task AddAsync(UserProfile user);
     Task<IEnumerable<UserProfile>> ListAsync();
+    Task UpdateAsync(UserProfile user);
 }

@@ -1,5 +1,6 @@
 ﻿using Application.Interfaces;
 using Domain.Entities;
+using Domain.Enums;
 using Domain.Exceptions;
 using System;
 using System.Collections.Generic;
@@ -76,7 +77,44 @@ namespace Application.Services
 
         public async Task CompleteRedemptionAsync(Guid redemptionId)
         {
-            var process = await _processRepo.GetByIdAsync(redemptionId) ?? throw new ArgumentException("Invalid redemption.");
+            var process = await _processRepo.GetByIdAsync(redemptionId)
+                          ?? throw new ArgumentException("Invalid redemption.");
+
+            if (process.Status != RedemptionStatus.Approved)
+                throw new InvalidOperationException("Redemption must be approved before completion.");
+
+            // Get related record
+            var record = await _recordRepo.GetByIdAsync(redemptionId)
+                         ?? throw new ArgumentException("Invalid redemption record.");
+
+            var product = await _productRepo.GetByIdAsync(record.ProductId)
+                          ?? throw new ArgumentException("Invalid product.");
+            var rewardPoints = await _rewardPointsRepo.GetByIdAsync(product.RewardPointsId)
+                               ?? throw new ArgumentException("Invalid reward points configuration.");
+
+            // Deduct points from user account
+            var account = await _accountRepo.GetByUserIdAsync(record.UserId)
+                          ?? throw new ArgumentException("Invalid user account.");
+
+            var transaction = new RewardTransaction(
+                Guid.NewGuid(),
+                account.UserId,
+                -rewardPoints.PointsValue,
+                $"Redeemed product {product.Name}",
+                redemptionId: redemptionId
+            );
+
+            account.RedeemPoints(rewardPoints.PointsValue, transaction);
+            await _accountRepo.UpdateAsync(account);
+            await _transactionRepo.AddAsync(transaction);
+
+            // Update product inventory
+            var inventory = await _inventoryRepo.GetByProductIdAsync(product.Id)
+                            ?? throw new ArgumentException("Invalid inventory.");
+            inventory.ReduceStock(1);
+            await _inventoryRepo.UpdateAsync(inventory);
+
+            // Mark process complete
             process.MarkCompleted();
             await _processRepo.UpdateAsync(process);
         }

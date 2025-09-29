@@ -54,7 +54,7 @@ namespace Tests.Application.Tests
 
             // Assert
             var updated = await accountRepo.GetByUserIdAsync(account.UserId);
-            Assert.Equal(0, updated!.RewardBalance);
+            Assert.Equal(50 - rewardPoints.PointsValue, updated!.RewardBalance);
 
             var inv = await inventoryRepo.GetByProductIdAsync(product.Id);
             Assert.Equal(4, inv!.StockQuantity);

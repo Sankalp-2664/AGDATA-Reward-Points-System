@@ -1,5 +1,8 @@
 ﻿using Application.Services;
-using Domain.Entities;
+using Domain.Entities.Product;
+using Domain.Entities.Reward;
+using Domain.Entities.User;
+using Domain.Enums;
 using Infrastructure.Persistence.Repositories;
 using System;
 using System.Collections.Generic;
@@ -16,7 +19,7 @@ namespace Tests.Application.Tests
         {
             // Arrange
             var redemptionRepo = new InMemoryRedemptionRecordRepository();
-            var processRepo = new InMemoryRedemptionProcessRepository();
+            var processRepo = new InMemoryRedemptionRequestRepository();
             var accountRepo = new InMemoryUserAccountRepository();
             var productRepo = new InMemoryProductRepository();
             var inventoryRepo = new InMemoryProductInventoryRepository();
@@ -39,11 +42,11 @@ namespace Tests.Application.Tests
             var product = new ProductInfo(Guid.NewGuid(), "SKU1", "Coffee Mug", rewardPoints.Id);
             await productRepo.AddAsync(product);
 
-            var inventory = new ProductInventory(product.Id, 5);
+            var inventory = new ProductInventory(Guid.NewGuid(), product.Id, 5);
             await inventoryRepo.AddAsync(inventory);
 
             // give the user some points
-            var tx = new RewardTransaction(Guid.NewGuid(), account.UserId, 50, "Init points");
+            var tx = new RewardTransaction(account.UserId, 50, "Init points", TransactionType.Credit);
             account.AddPoints(50, tx);
             await accountRepo.UpdateAsync(account);
 

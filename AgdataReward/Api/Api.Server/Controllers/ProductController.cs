@@ -1,5 +1,6 @@
 ﻿using Application.Interfaces;
 using Microsoft.AspNetCore.Mvc;
+using Domain.Entities.Product;
 
 namespace Api.Server.Controllers
 {

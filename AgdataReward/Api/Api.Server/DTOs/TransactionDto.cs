@@ -9,5 +9,6 @@
         public Guid? EventId { get; set; }
         public Guid? RedemptionId { get; set; }
         public DateTime Timestamp { get; set; }
+        public string TransactionType { get; set; } = string.Empty; 
     }
 }

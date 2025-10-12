@@ -1,5 +1,5 @@
 ﻿using Application.Interfaces;
-using Domain.Entities;
+using Domain.Entities.Event;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Api.Server.Controllers

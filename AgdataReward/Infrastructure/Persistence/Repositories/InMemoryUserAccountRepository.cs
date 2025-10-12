@@ -1,5 +1,5 @@
 ﻿using Application.Interfaces;
-using Domain.Entities;
+using Domain.Entities.User;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -12,7 +12,7 @@ namespace Infrastructure.Persistence.Repositories
     {
         private readonly Dictionary<Guid, UserAccount> _accounts = new();
 
-        public Task<UserAccount?> GetByUserIdAsync(Guid userId)
+        public virtual Task<UserAccount?> GetByUserIdAsync(Guid userId)
         {
             _accounts.TryGetValue(userId, out var account);
             return Task.FromResult(account);

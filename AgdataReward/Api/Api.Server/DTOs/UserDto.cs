@@ -8,6 +8,6 @@
         public string FirstName { get; set; } = string.Empty;
         public string LastName { get; set; } = string.Empty;
         public int RewardBalance { get; set; }
+        public string UserRole { get; set; } = string.Empty; 
     }
-
 }

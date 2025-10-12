@@ -1,5 +1,6 @@
 ﻿using Application.Interfaces;
-using Domain.Entities;
+using Domain.Entities.Redemption;
+using Domain.Entities.Reward;
 using Domain.Enums;
 using Domain.Exceptions;
 using System;
@@ -13,7 +14,7 @@ namespace Application.Services
     public class RedemptionService : IRedemptionService
     {
         private readonly IRedemptionRecordRepository _recordRepo;
-        private readonly IRedemptionProcessRepository _processRepo;
+        private readonly IRedemptionRequestRepository _processRepo;
         private readonly IUserAccountRepository _accountRepo;
         private readonly IProductRepository _productRepo;
         private readonly IProductInventoryRepository _inventoryRepo;
@@ -22,7 +23,7 @@ namespace Application.Services
 
         public RedemptionService(
             IRedemptionRecordRepository recordRepo,
-            IRedemptionProcessRepository processRepo,
+            IRedemptionRequestRepository processRepo,
             IUserAccountRepository accountRepo,
             IProductRepository productRepo,
             IProductInventoryRepository inventoryRepo,
@@ -55,8 +56,8 @@ namespace Application.Services
             var record = new RedemptionRecord(Guid.NewGuid(), userId, productId);
             await _recordRepo.AddAsync(record);
 
-            var process = new RedemptionProcess(record.Id, rewardPoints.PointsValue);
-            await _processRepo.UpdateAsync(process);
+            var request = new RedemptionRequest(record.Id, rewardPoints.PointsValue);
+            await _processRepo.UpdateAsync(request);
 
             return record;
         }
@@ -97,10 +98,10 @@ namespace Application.Services
                           ?? throw new ArgumentException("Invalid user account.");
 
             var transaction = new RewardTransaction(
-                Guid.NewGuid(),
                 account.UserId,
                 -rewardPoints.PointsValue,
                 $"Redeemed product {product.Name}",
+                TransactionType.Debit,
                 redemptionId: redemptionId
             );
 

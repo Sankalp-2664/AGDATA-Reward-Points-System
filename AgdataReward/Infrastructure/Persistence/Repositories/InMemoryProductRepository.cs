@@ -1,4 +1,5 @@
 ﻿using Application.Interfaces;
+using Domain.Entities.Product;
 using System;
 using System.Collections.Generic;
 using System.Linq;

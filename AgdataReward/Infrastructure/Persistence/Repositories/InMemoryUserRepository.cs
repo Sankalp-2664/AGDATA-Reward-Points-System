@@ -1,9 +1,8 @@
 ﻿using Application.Interfaces;
-using Domain.Entities;
+using Domain.Entities.User;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace Infrastructure.Persistence.Repositories
@@ -21,6 +20,15 @@ namespace Infrastructure.Persistence.Repositories
         public Task<UserProfile?> GetByEmployeeIdAsync(string employeeId)
             => Task.FromResult(_users.FirstOrDefault(u => u.EmployeeId.Equals(employeeId, StringComparison.OrdinalIgnoreCase)));
 
+        public Task<UserProfile?> FindByEmailOrEmployeeIdAsync(string email, string employeeId)
+        {
+            var user = _users.FirstOrDefault(u =>
+                u.Email.Equals(email, StringComparison.OrdinalIgnoreCase) ||
+                u.EmployeeId.Equals(employeeId, StringComparison.OrdinalIgnoreCase));
+
+            return Task.FromResult(user);
+        }
+
         public Task AddAsync(UserProfile user)
         {
             _users.Add(user);
@@ -32,7 +40,13 @@ namespace Infrastructure.Persistence.Repositories
 
         public Task UpdateAsync(UserProfile user)
         {
-            throw new NotImplementedException();
+            var index = _users.FindIndex(u => u.Id == user.Id);
+            if (index >= 0)
+            {
+                _users[index] = user;
+            }
+
+            return Task.CompletedTask;
         }
     }
 }

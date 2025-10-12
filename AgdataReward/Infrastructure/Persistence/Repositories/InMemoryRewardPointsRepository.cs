@@ -1,5 +1,5 @@
 ﻿using Application.Interfaces;
-using Domain.Entities;
+using Domain.Entities.Reward;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -12,7 +12,7 @@ namespace Infrastructure.Persistence.Repositories
     {
         private readonly Dictionary<Guid, RewardPoints> _rewardPoints = new();
 
-        public Task<RewardPoints?> GetByIdAsync(Guid id)
+        public virtual Task<RewardPoints?> GetByIdAsync(Guid id)
         {
             _rewardPoints.TryGetValue(id, out var points);
             return Task.FromResult(points);

@@ -7,9 +7,9 @@ using System.Threading.Tasks;
 
 namespace Application.Interfaces
 {
-    public interface IRedemptionRecordRepository
+    public interface IRedemptionRequestRepository
     {
-        Task<RedemptionRecord?> GetByIdAsync(Guid id);
-        Task AddAsync(RedemptionRecord record);
+        Task<RedemptionRequest?> GetByIdAsync(Guid redemptionId);
+        Task UpdateAsync(RedemptionRequest process);
     }
 }

@@ -14,5 +14,4 @@
         public int Rank { get; set; }
         public Guid RewardPointsId { get; set; }
     }
-
 }

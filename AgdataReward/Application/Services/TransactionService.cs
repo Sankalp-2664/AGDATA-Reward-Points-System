@@ -1,5 +1,5 @@
 ﻿using Application.Interfaces;
-using Domain.Entities;
+using Domain.Entities.Reward;
 using System;
 using System.Collections.Generic;
 using System.Linq;

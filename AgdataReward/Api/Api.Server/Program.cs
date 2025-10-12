@@ -20,7 +20,7 @@ builder.Services.AddSingleton<IProductInventoryRepository, InMemoryProductInvent
 builder.Services.AddSingleton<IRewardPointsRepository, InMemoryRewardPointsRepository>();
 builder.Services.AddSingleton<IRewardTransactionRepository, InMemoryRewardTransactionRepository>();
 builder.Services.AddSingleton<IRedemptionRecordRepository, InMemoryRedemptionRecordRepository>();
-builder.Services.AddSingleton<IRedemptionProcessRepository, InMemoryRedemptionProcessRepository>();
+builder.Services.AddSingleton<IRedemptionRequestRepository, InMemoryRedemptionRequestRepository>();
 
 // ?? Register Application Services
 builder.Services.AddScoped<IEventService, EventService>();

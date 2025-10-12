@@ -1,7 +1,10 @@
 ﻿using Application.Interfaces;
-using Domain.Entities;
+using Domain.Entities.Event;
+using Domain.Entities.Reward;
+using Domain.Enums;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -35,7 +38,12 @@ namespace Application.Services
 
         public async Task<EventDefinition> CreateEventAsync(string code, string title)
         {
-            var definition = new EventDefinition(Guid.NewGuid(), code, title);
+            if (string.IsNullOrWhiteSpace(code))
+                throw new ValidationException("Event code cannot be null or empty.");
+            if (string.IsNullOrWhiteSpace(title))
+                throw new ValidationException("Event title cannot be null or empty.");
+
+            var definition = new EventDefinition(Guid.NewGuid(), code.Trim(), title.Trim());
             await _definitionRepo.AddAsync(definition);
             return definition;
         }
@@ -48,6 +56,8 @@ namespace Application.Services
 
         public async Task<EventDefinition?> GetEventByIdAsync(Guid id)
         {
+            if (id == Guid.Empty)
+                throw new ValidationException("Event ID cannot be empty.");
             return await _definitionRepo.GetByIdAsync(id);
         }
 
@@ -56,11 +66,13 @@ namespace Application.Services
             return await _definitionRepo.ListAsync();
         }
 
+
         /// <summary>
         /// eventInstanceId = EventInstance.Id (the occurrence). Assigns a winner for that occurrence.
         /// </summary>
         public async Task AssignWinnerAsync(Guid eventInstanceId, Guid userId, int rank)
         {
+
             // 1) load the event instance (occurrence)
             var instance = await _instanceRepo.GetByIdAsync(eventInstanceId)
                 ?? throw new ArgumentException("Invalid event instance id.");
@@ -82,18 +94,17 @@ namespace Application.Services
 
             // 5) create transaction and persist it
             var transaction = new RewardTransaction(
-                Guid.NewGuid(),
                 userId,
-                pointsToAward,
+                rewardPoints.PointsValue,
                 $"Earned from event {instance.EventId} (instance {instance.Id})",
-                eventId: instance.EventId,
-                redemptionId: null
+                TransactionType.Credit,
+                eventId: instance.EventId
             );
 
             await _transactionRepo.AddAsync(transaction);
 
             // 6) update account through domain method (which also records the transaction inside the aggregate)
-            account.AddPoints(pointsToAward, transaction);
+            account.AddPoints(rewardPoints.PointsValue, transaction);
             await _accountRepo.UpdateAsync(account);
         }
     }

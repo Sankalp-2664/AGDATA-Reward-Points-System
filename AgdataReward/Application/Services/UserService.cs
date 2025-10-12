@@ -1,13 +1,13 @@
 ﻿using Application.Interfaces;
 using Domain.Exceptions;
 using Domain.ValueObjects;
-using Domain.Entities;
 using Domain.Enums;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Domain.Entities.User;
 
 namespace Application.Services
 {
@@ -22,22 +22,36 @@ namespace Application.Services
             _accountRepository = accountRepository;
         }
 
-        public async Task<UserProfile> RegisterUserAsync(string employeeId, string email, string firstName, string lastName)
+        public async Task<UserProfile> RegisterUserAsync(string employeeId, string email, string firstName, string lastName, UserRole role)
         {
-            // Prevent duplicates
-            var existingUser = await _userRepository.GetByEmailAsync(email);
-            if (existingUser != null)
-                throw new DuplicateUserException(email);
+            var employee = new EmployeeId(employeeId);
+            var userEmail = new Email(email);
 
-            existingUser = await _userRepository.GetByEmployeeIdAsync(employeeId);
+            var existingUser = await _userRepository.FindByEmailOrEmployeeIdAsync(userEmail.Value, employee.Value);
             if (existingUser != null)
-                throw new DuplicateUserException(employeeId);
+            {
+                if (existingUser.Email == userEmail.Value)
+                    throw new DuplicateUserException($"Email '{email}' is already registered.");
 
-            // Create new profile with ValueObjects
-            var profile = new UserProfile(Guid.NewGuid(), new EmployeeId(employeeId).Value, new Email(email).Value, firstName, lastName);
+                if (existingUser.EmployeeId == employee.Value)
+                    throw new DuplicateUserException($"Employee ID '{employeeId}' is already registered.");
+            }
+
+            if (!Enum.IsDefined(typeof(UserRole), role))
+                throw new ArgumentException($"Invalid role: {role}", nameof(role));
+
+
+            var profile = new UserProfile(
+                Guid.NewGuid(),
+                employee.Value,
+                userEmail.Value,
+                firstName,
+                lastName,
+                role
+            );
+
             await _userRepository.AddAsync(profile);
 
-            // Create account with 0 points
             var account = new UserAccount(profile.Id);
             await _accountRepository.UpdateAsync(account);
 
@@ -45,9 +59,13 @@ namespace Application.Services
         }
 
         public async Task<UserProfile?> GetUserByEmailAsync(string email)
-            => await _userRepository.GetByEmailAsync(email);
+        {
+            return await _userRepository.GetByEmailAsync(email);
+        }
 
         public async Task<UserAccount?> GetUserAccountAsync(Guid userId)
-            => await _accountRepository.GetByUserIdAsync(userId);
+        {
+            return await _accountRepository.GetByUserIdAsync(userId);
+        }
     }
 }

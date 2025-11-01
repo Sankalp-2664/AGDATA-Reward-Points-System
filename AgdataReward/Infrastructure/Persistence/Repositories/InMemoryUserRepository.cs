@@ -1,5 +1,6 @@
 ﻿using Application.Interfaces;
 using Domain.Entities.User;
+using Domain.ValueObjects;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -14,20 +15,21 @@ namespace Infrastructure.Persistence.Repositories
         public Task<UserProfile?> GetByIdAsync(Guid id)
             => Task.FromResult(_users.FirstOrDefault(u => u.Id == id));
 
-        public Task<UserProfile?> GetByEmailAsync(string email)
-            => Task.FromResult(_users.FirstOrDefault(u => u.Email.Equals(email, StringComparison.OrdinalIgnoreCase)));
+        public Task<UserProfile?> GetByEmailAsync(Email email)
+    => Task.FromResult(_users.FirstOrDefault(u => u.Email.Value.Equals(email.Value, StringComparison.OrdinalIgnoreCase)));
 
-        public Task<UserProfile?> GetByEmployeeIdAsync(string employeeId)
-            => Task.FromResult(_users.FirstOrDefault(u => u.EmployeeId.Equals(employeeId, StringComparison.OrdinalIgnoreCase)));
+        public Task<UserProfile?> GetByEmployeeIdAsync(EmployeeId employeeId)
+            => Task.FromResult(_users.FirstOrDefault(u => u.EmployeeId.Value.Equals(employeeId.Value, StringComparison.OrdinalIgnoreCase)));
 
-        public Task<UserProfile?> FindByEmailOrEmployeeIdAsync(string email, string employeeId)
+        public Task<UserProfile?> FindByEmailOrEmployeeIdAsync(Email email, EmployeeId employeeId)
         {
             var user = _users.FirstOrDefault(u =>
-                u.Email.Equals(email, StringComparison.OrdinalIgnoreCase) ||
-                u.EmployeeId.Equals(employeeId, StringComparison.OrdinalIgnoreCase));
+                u.Email.Value.Equals(email.Value, StringComparison.OrdinalIgnoreCase) ||
+                u.EmployeeId.Value.Equals(employeeId.Value, StringComparison.OrdinalIgnoreCase));
 
             return Task.FromResult(user);
         }
+
 
         public Task AddAsync(UserProfile user)
         {

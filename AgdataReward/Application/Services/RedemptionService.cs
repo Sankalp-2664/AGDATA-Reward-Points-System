@@ -38,9 +38,9 @@ namespace Application.Services
             _rewardPointsRepo = rewardPointsRepo;
             _transactionRepo = transactionRepo;
         }
-
+        
         public async Task<RedemptionRecord> RequestRedemptionAsync(Guid userId, Guid productId)
-        {
+        { 
             var product = await _productRepo.GetByIdAsync(productId) ?? throw new ArgumentException("Invalid product.");
             var inventory = await _inventoryRepo.GetByProductIdAsync(productId) ?? throw new ArgumentException("No inventory.");
             var rewardPoints = await _rewardPointsRepo.GetByIdAsync(product.RewardPointsId) ?? throw new ArgumentException("Invalid reward points configuration.");
@@ -51,6 +51,17 @@ namespace Application.Services
 
             if (inventory.StockQuantity <= 0)
                 throw new InvalidRedemptionException("Product is out of stock.");
+
+            var allRecords = await _recordRepo.GetAllAsync();
+            var existingRequests = await _processRepo.GetPendingOrActiveByUserAndProductAsync(userId, productId, allRecords);
+            foreach (var req in existingRequests)
+            {
+                var existingRecord = await _recordRepo.GetByIdAsync(req.RedemptionId);
+                if (existingRecord != null && existingRecord.ProductId == productId && existingRecord.UserId == userId)
+                {
+                    throw new InvalidRedemptionException("A pending or active redemption for this product already exists.");
+                }
+            }
 
             // Create record + process
             var record = new RedemptionRecord(Guid.NewGuid(), userId, productId);

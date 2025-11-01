@@ -27,13 +27,13 @@ namespace Application.Services
             var employee = new EmployeeId(employeeId);
             var userEmail = new Email(email);
 
-            var existingUser = await _userRepository.FindByEmailOrEmployeeIdAsync(userEmail.Value, employee.Value);
+            var existingUser = await _userRepository.FindByEmailOrEmployeeIdAsync(userEmail, employee);
             if (existingUser != null)
             {
-                if (existingUser.Email == userEmail.Value)
+                if (existingUser.Email.Value == userEmail.Value)
                     throw new DuplicateUserException($"Email '{email}' is already registered.");
 
-                if (existingUser.EmployeeId == employee.Value)
+                if (existingUser.EmployeeId.Value == employee.Value)
                     throw new DuplicateUserException($"Employee ID '{employeeId}' is already registered.");
             }
 
@@ -43,8 +43,8 @@ namespace Application.Services
 
             var profile = new UserProfile(
                 Guid.NewGuid(),
-                employee.Value,
-                userEmail.Value,
+                employee,
+                userEmail,
                 firstName,
                 lastName,
                 role
@@ -60,7 +60,8 @@ namespace Application.Services
 
         public async Task<UserProfile?> GetUserByEmailAsync(string email)
         {
-            return await _userRepository.GetByEmailAsync(email);
+            var userEmail = new Email(email);
+            return await _userRepository.GetByEmailAsync(userEmail);
         }
 
         public async Task<UserAccount?> GetUserAccountAsync(Guid userId)

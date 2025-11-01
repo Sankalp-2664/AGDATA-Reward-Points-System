@@ -15,10 +15,10 @@ namespace Domain.Entities.Redemption
     {
         public Guid Id { get; private set; } // Primary Key
         public Guid UserId { get; private set; } // Foreign Key to UserProfile (UserProfile.Id)
-        public Guid ProductId { get; private set; } // Foreign Key to ProductInfo (ProductInfo.Id)
-        public DateTime RedeemedAt { get; private set; }
+        public Guid ProductId { get; private set; } // Foreign Key to ProductInformation (ProductInformation.Id)
+        public DateTime RedeemedAt { get; private set; } // Timestamp when the product was redeemed
         public virtual UserProfile? User { get; private set; } // For navigation between UserProfile and RedemptionRecord
-        public virtual ProductInfo? Product { get; private set; } // For navigation between ProductInfo and RedemptionRecord
+        public virtual ProductInformation? Product { get; private set; } // For navigation between ProductInformation and RedemptionRecord
         protected RedemptionRecord() { } // For ORM
 
         public RedemptionRecord(Guid id, Guid userId, Guid productId)

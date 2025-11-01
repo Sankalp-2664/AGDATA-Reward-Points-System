@@ -11,8 +11,8 @@ namespace Domain.Entities.Reward
     /// </summary>
     public class RewardPoints
     {
-        public Guid Id { get; }
-        public int PointsValue { get; }
+        public Guid Id { get; } // Primary key
+        public int PointsValue { get; } // The value of the reward points
 
         protected RewardPoints() { } // For ORM
         public RewardPoints(Guid id, int pointsValue)

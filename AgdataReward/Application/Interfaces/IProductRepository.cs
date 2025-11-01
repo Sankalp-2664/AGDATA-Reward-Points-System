@@ -1,4 +1,5 @@
 ﻿using Domain.Entities.Product;
+using Domain.ValueObjects;  
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,8 +10,8 @@ namespace Application.Interfaces;
 
 public interface IProductRepository
 {
-    Task<ProductInfo?> GetByIdAsync(Guid id);
-    Task<ProductInfo?> GetBySkuAsync(string sku);
-    Task AddAsync(ProductInfo product);
-    Task<IEnumerable<ProductInfo>> ListAsync();
+    Task<ProductInformation?> GetByIdAsync(Guid id);
+    Task<ProductInformation?> GetBySkuAsync(SKU sku);
+    Task AddAsync(ProductInformation product);
+    Task<IEnumerable<ProductInformation>> ListAsync();
 }

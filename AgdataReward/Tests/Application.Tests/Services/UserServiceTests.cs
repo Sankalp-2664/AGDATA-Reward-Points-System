@@ -1,6 +1,7 @@
 ﻿using Application.Services;
 using Domain.Exceptions;
 using Domain.Entities.User;
+using Domain.Enums;
 using Infrastructure.Persistence.Repositories;
 using System;
 using System.Collections.Generic;
@@ -9,7 +10,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Xunit;
 
-namespace Tests.Application.Tests
+namespace Tests.Application.Tests.Services
 {
     public class UserServiceTests
     {
@@ -22,11 +23,11 @@ namespace Tests.Application.Tests
             var service = new UserService(userRepo, accountRepo);
 
             // Act
-            var user = await service.RegisterUserAsync("EMP001", "sankalp@agdata.com", "sankalp", "chakre", Domain.Enums.UserRole.User);
+            var user = await service.RegisterUserAsync("EMP001", "sankalp@agdata.com", "sankalp", "chakre",  UserRole.User);
 
             // Assert
             Assert.NotNull(user);
-            Assert.Equal("sankalp@agdata.com", user.Email);
+            Assert.Equal("sankalp@agdata.com", user.Email.Value);
 
             var account = await accountRepo.GetByUserIdAsync(user.Id);
             Assert.NotNull(account);
@@ -41,7 +42,7 @@ namespace Tests.Application.Tests
             var service = new UserService(new InMemoryUserRepository(), new InMemoryUserAccountRepository());
 
             await Assert.ThrowsAsync<ArgumentException>(() =>
-                service.RegisterUserAsync(employeeId, "user@agdata.com", "Sankalp", "C", Domain.Enums.UserRole.User));
+                service.RegisterUserAsync(employeeId, "user@agdata.com", "Sankalp", "C", UserRole.User));
         }
 
         [Theory]
@@ -53,7 +54,7 @@ namespace Tests.Application.Tests
             var service = new UserService(new InMemoryUserRepository(), new InMemoryUserAccountRepository());
 
             await Assert.ThrowsAsync<ArgumentException>(() =>
-                service.RegisterUserAsync("EMP123", email, "Sankalp", "C", Domain.Enums.UserRole.User));
+                service.RegisterUserAsync("EMP123", email, "Sankalp", "C", UserRole.User));
         }
 
         [Theory]
@@ -64,7 +65,7 @@ namespace Tests.Application.Tests
             var service = new UserService(new InMemoryUserRepository(), new InMemoryUserAccountRepository());
 
             await Assert.ThrowsAsync<ArgumentNullException>(() =>
-                service.RegisterUserAsync("EMP123", "user@agdata.com", firstName, "C", Domain.Enums.UserRole.User));
+                service.RegisterUserAsync("EMP123", "user@agdata.com", firstName, "C",  UserRole.User));
         }
 
         [Theory]
@@ -75,7 +76,7 @@ namespace Tests.Application.Tests
             var service = new UserService(new InMemoryUserRepository(), new InMemoryUserAccountRepository());
 
             await Assert.ThrowsAsync<ArgumentNullException>(() =>
-                service.RegisterUserAsync("EMP123", "user@agdata.com", "Sankalp", lastName, Domain.Enums.UserRole.User));
+                service.RegisterUserAsync("EMP123", "user@agdata.com", "Sankalp", lastName,  UserRole.User));
         }
 
         [Theory]
@@ -87,7 +88,7 @@ namespace Tests.Application.Tests
             var service = new UserService(new InMemoryUserRepository(), new InMemoryUserAccountRepository());
 
             await Assert.ThrowsAsync<ArgumentException>(() =>
-                service.RegisterUserAsync("EMP123", email, "Sankalp", "C", Domain.Enums.UserRole.User));
+                service.RegisterUserAsync("EMP123", email, "Sankalp", "C",  UserRole.User));
         }
 
         [Fact]
@@ -98,11 +99,11 @@ namespace Tests.Application.Tests
             var service = new UserService(userRepo, accountRepo);
 
             // First registration
-            await service.RegisterUserAsync("EMP001", "first@agdata.com", "First", "Name", Domain.Enums.UserRole.User);
+            await service.RegisterUserAsync("EMP001", "first@agdata.com", "First", "Name",  UserRole.User);
 
             // Second registration with same employee ID
             await Assert.ThrowsAsync<DuplicateUserException>(() =>
-                service.RegisterUserAsync("EMP001", "second@agdata.com", "Second", "Name", Domain.Enums.UserRole.User));
+                service.RegisterUserAsync("EMP001", "second@agdata.com", "Second", "Name",  UserRole.User));
         }
 
         [Fact]
@@ -113,11 +114,11 @@ namespace Tests.Application.Tests
             var service = new UserService(userRepo, accountRepo);
 
             // First registration
-            await service.RegisterUserAsync("EMP001", "duplicate@agdata.com", "Alice", "Smith", Domain.Enums.UserRole.User);
+            await service.RegisterUserAsync("EMP001", "duplicate@agdata.com", "Alice", "Smith",  UserRole.User);
 
             // Second registration with same email
             await Assert.ThrowsAsync<DuplicateUserException>(() =>
-                service.RegisterUserAsync("EMP002", "duplicate@agdata.com", "Bob", "Brown", Domain.Enums.UserRole.User));
+                service.RegisterUserAsync("EMP002", "duplicate@agdata.com", "Bob", "Brown",  UserRole.User));
         }
 
         [Fact]
@@ -129,9 +130,9 @@ namespace Tests.Application.Tests
 
             var emailWithWhitespace = "  user@agdata.com  ";
 
-            var user = await service.RegisterUserAsync("EMP999", emailWithWhitespace, "Sankalp", "C", Domain.Enums.UserRole.User);
+            var user = await service.RegisterUserAsync("EMP999", emailWithWhitespace, "Sankalp", "C",  UserRole.User);
 
-            Assert.Equal("user@agdata.com", user.Email);
+            Assert.Equal("user@agdata.com", user.Email.Value);
         }
 
         [Fact]
@@ -144,7 +145,7 @@ namespace Tests.Application.Tests
             var longFirstName = new string('A', 1000);
             var longLastName = new string('Z', 1000);
 
-            var user = await service.RegisterUserAsync("EMP_LONG", "longname@agdata.com", longFirstName, longLastName, Domain.Enums.UserRole.User);
+            var user = await service.RegisterUserAsync("EMP_LONG", "longname@agdata.com", longFirstName, longLastName,  UserRole.User);
 
             Assert.NotNull(user);
             Assert.Equal(longFirstName, user.FirstName);
@@ -160,9 +161,9 @@ namespace Tests.Application.Tests
 
             var email = "SANKALP.CHAKRE@AGDATA.COM";
 
-            var user = await service.RegisterUserAsync("EMP1234", email, "Sankalp", "Chakre", Domain.Enums.UserRole.User);
+            var user = await service.RegisterUserAsync("EMP1234", email, "Sankalp", "Chakre",  UserRole.User);
 
-            Assert.Equal("SANKALP.CHAKRE@AGDATA.COM", user.Email);
+            Assert.Equal("SANKALP.CHAKRE@AGDATA.COM", user.Email.Value);
         }
 
         [Fact]
@@ -185,7 +186,7 @@ namespace Tests.Application.Tests
             var invalidEmail = "invalidemail.agdata.com";
 
             await Assert.ThrowsAsync<ArgumentException>(() =>
-                service.RegisterUserAsync("EMP500", invalidEmail, "Sankalp", "C", Domain.Enums.UserRole.User));
+                service.RegisterUserAsync("EMP500", invalidEmail, "Sankalp", "C",  UserRole.User));
         }
 
         [Fact]
@@ -195,7 +196,7 @@ namespace Tests.Application.Tests
             var accountRepo = new InMemoryUserAccountRepository();
             var service = new UserService(userRepo, accountRepo);
 
-            var invalidRole = (Domain.Enums.UserRole)999;
+            var invalidRole = ( UserRole)999;
 
             await Assert.ThrowsAsync<ArgumentException>(() =>
                 service.RegisterUserAsync("EMP888", "valid@agdata.com", "Sankalp", "Chakre", invalidRole));
@@ -208,7 +209,7 @@ namespace Tests.Application.Tests
             var accountRepo = new InMemoryUserAccountRepository();
             var service = new UserService(userRepo, accountRepo);
 
-            var user = await service.RegisterUserAsync("EMP777", "sankalp@agdata.com", "Sankalp", "Chakre", Domain.Enums.UserRole.User);
+            var user = await service.RegisterUserAsync("EMP777", "sankalp@agdata.com", "Sankalp", "Chakre",  UserRole.User);
             var account = await service.GetUserAccountAsync(user.Id);
 
             Assert.NotNull(account);

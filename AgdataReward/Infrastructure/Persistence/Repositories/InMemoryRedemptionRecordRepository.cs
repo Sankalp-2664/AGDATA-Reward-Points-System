@@ -20,5 +20,11 @@ namespace Infrastructure.Persistence.Repositories
             _records.Add(record);
             return Task.CompletedTask;
         }
+
+        public Task<IEnumerable<RedemptionRecord>> GetAllAsync()
+        {
+            return Task.FromResult(_records.AsEnumerable());
+        }
+
     }
 }

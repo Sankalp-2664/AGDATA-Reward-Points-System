@@ -1,4 +1,5 @@
 ﻿using Application.Interfaces;
+using Domain.ValueObjects;
 using Domain.Entities.Product;
 using System;
 using System.Collections.Generic;
@@ -10,21 +11,25 @@ namespace Infrastructure.Persistence.Repositories
 {
     public class InMemoryProductRepository : IProductRepository
     {
-        private readonly List<ProductInfo> _products = new();
+        private readonly List<ProductInformation> _products = new();
 
-        public Task<ProductInfo?> GetByIdAsync(Guid id)
+        public Task<ProductInformation?> GetByIdAsync(Guid id)
             => Task.FromResult(_products.FirstOrDefault(p => p.Id == id));
 
-        public Task<ProductInfo?> GetBySkuAsync(string sku)
-            => Task.FromResult(_products.FirstOrDefault(p => p.SKU.Equals(sku, StringComparison.OrdinalIgnoreCase)));
+        public Task<ProductInformation?> GetBySkuAsync(SKU sku)
+        {
+            return Task.FromResult(
+                _products.FirstOrDefault(p => p.SKU.Equals(sku))
+            );
+        }
 
-        public Task AddAsync(ProductInfo product)
+        public Task AddAsync(ProductInformation product)
         {
             _products.Add(product);
             return Task.CompletedTask;
         }
 
-        public Task<IEnumerable<ProductInfo>> ListAsync()
-            => Task.FromResult<IEnumerable<ProductInfo>>(_products);
+        public Task<IEnumerable<ProductInformation>> ListAsync()
+            => Task.FromResult<IEnumerable<ProductInformation>>(_products);
     }
 }

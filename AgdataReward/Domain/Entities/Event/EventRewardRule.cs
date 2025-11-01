@@ -14,11 +14,11 @@ namespace Domain.Entities.Event
     {
         public Guid Id { get; private set; } // Primary Key
         public Guid EventId { get; private set; } // Foreign Key to EventDefinition (EventDefinition.Id)
-        public int Rank { get; private set; }
+        public int Rank { get; private set; } // Rank position (1 for first place, 2 for second, etc.)
         public Guid RewardPointsId { get; private set; } // Foreign Key to RewardPoints (RewardPoints.Id)
         
-        public virtual EventDefinition? Event { get; private set; }
-        public virtual RewardPoints? RewardPoints { get; private set; }
+        public virtual EventDefinition? Event { get; private set; } // Navigation property to EventDefinition
+        public virtual RewardPoints? RewardPoints { get; private set; } // Navigation property to RewardPoints
 
         protected EventRewardRule() { } // For ORM
 

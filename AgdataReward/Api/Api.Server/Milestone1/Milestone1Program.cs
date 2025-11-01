@@ -1,11 +1,12 @@
-﻿using Application.Services;
-using Domain.Entities.User;
+﻿using Application.Interfaces;
+using Application.Services;
 using Domain.Entities.Event;
-using Domain.Entities.Reward;
 using Domain.Entities.Product;
-using Infrastructure.Persistence.Repositories;
+using Domain.Entities.Reward;
+using Domain.Entities.User;
 using Domain.Enums;
-using Application.Interfaces;
+using Domain.ValueObjects;
+using Infrastructure.Persistence.Repositories;
 
 namespace Api.Server.Milestone1
 {
@@ -55,7 +56,7 @@ namespace Api.Server.Milestone1
             Console.WriteLine($"{user.FirstName} assigned as winner for event instance.");
 
             // 6. Add a product and inventory
-            var product = new ProductInfo(Guid.NewGuid(), "SKU1", "Coffee Mug", rewardPoints.Id);
+            var product = new ProductInformation(Guid.NewGuid(), new SKU("SKU1"), "Coffee Mug", rewardPoints.Id);
             await productRepo.AddAsync(product);
             var inventory = new ProductInventory(Guid.NewGuid(), product.Id, 5);
             await inventoryRepo.AddAsync(inventory);

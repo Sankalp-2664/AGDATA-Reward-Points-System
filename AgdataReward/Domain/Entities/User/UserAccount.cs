@@ -16,8 +16,8 @@ namespace Domain.Entities.User
     {
         public Guid Id { get; private set; } // Primary key for the account
         public Guid UserId { get; } // Foreign key linking to the UserProfile
-        public int RewardBalance { get; private set; }
-        public AccountStatus Status { get; private set; }
+        public int RewardBalance { get; private set; } // Current reward points balance
+        public AccountStatus Status { get; private set; } // Account status (Active, Inactive)
         public virtual UserProfile? User { get; private set; } //// For navigation between UserProfile and UserAccount
 
         private readonly List<RewardTransaction> _transactions = new(); // Backing field for transactions
@@ -34,7 +34,7 @@ namespace Domain.Entities.User
             Status = AccountStatus.Active;
         }
 
-        public void AddPoints(int points, RewardTransaction transaction)
+        public void AddPoints(int points, RewardTransaction transaction) // Add points to the account
         {
             if (transaction == null) throw new ArgumentNullException(nameof(transaction));
             if (points <= 0) throw new ArgumentException("Points must be positive.", nameof(points));
@@ -45,7 +45,7 @@ namespace Domain.Entities.User
             _transactions.Add(transaction);
         }
 
-        public void RedeemPoints(int points, RewardTransaction transaction)
+        public void RedeemPoints(int points, RewardTransaction transaction) // Redeem points from the account
         {
             if (transaction == null) throw new ArgumentNullException(nameof(transaction));
             if (points <= 0) throw new ArgumentException("Points must be positive.", nameof(points));
@@ -58,14 +58,14 @@ namespace Domain.Entities.User
             _transactions.Add(transaction);
         }
 
-        public void SuspendAccount()
+        public void SuspendAccount() // Suspend the account
         {
             if (Status == AccountStatus.Inactive)
                 throw new InvalidOperationException("Account is already inactive.");
 
             Status = AccountStatus.Inactive;
         }
-        public void ActivateAccount()
+        public void ActivateAccount() // Activate the account
         {
             if (Status == AccountStatus.Active)
                 throw new InvalidOperationException("Account is already active.");

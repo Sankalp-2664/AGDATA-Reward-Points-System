@@ -1,4 +1,5 @@
 ﻿using Domain.Entities.Product;
+using Domain.ValueObjects;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,7 +10,7 @@ namespace Application.Interfaces
 {
     public interface IProductService
     {
-        Task<ProductInfo> AddProductAsync(string sku, string name, Guid rewardPointsId);
-        Task<IEnumerable<ProductInfo>> GetCatalogAsync();
+        Task<ProductInformation> AddProductAsync(string sku, string name, Guid rewardPointsId);
+        Task<IEnumerable<ProductInformation>> GetCatalogAsync();
     }
 }

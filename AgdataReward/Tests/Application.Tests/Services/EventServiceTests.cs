@@ -3,7 +3,6 @@ using Domain.Entities.Event;
 using Domain.Entities.Reward;
 using Domain.Entities.User;
 using Domain.Enums;
-using Domain.Exceptions;
 using Infrastructure.Persistence.Repositories;
 using System;
 using System.ComponentModel.DataAnnotations;
@@ -11,7 +10,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Xunit;
 
-namespace Tests.Application.Tests
+namespace Tests.Application.Tests.Services
 {
     public class EventServiceTests
     {
@@ -55,7 +54,7 @@ namespace Tests.Application.Tests
         {
             var service = BuildService(out var defRepo, out var ruleRepo, out var instRepo, out var accRepo, out var txRepo, out var ptsRepo);
 
-            await Assert.ThrowsAsync<ValidationException>(() =>
+            await Assert.ThrowsAsync<ArgumentException>(() =>
                 service.CreateEventAsync(code, "Some Title"));
         }
 
@@ -67,7 +66,7 @@ namespace Tests.Application.Tests
         {
             var service = BuildService(out var defRepo, out var ruleRepo, out var instRepo, out var accRepo, out var txRepo, out var ptsRepo);
 
-            await Assert.ThrowsAsync<ValidationException>(() =>
+            await Assert.ThrowsAsync<ArgumentException>(() =>
                 service.CreateEventAsync("CODEX", title));
         }
 
@@ -97,23 +96,20 @@ namespace Tests.Application.Tests
         {
             var service = BuildService(out var defRepo, out var ruleRepo, out var instRepo, out var accRepo, out var txRepo, out var ptsRepo);
 
-            // Setup user account
             var userId = Guid.NewGuid();
             var userAccount = new UserAccount(userId);
             await accRepo.AddAsync(userAccount);
 
-            // Create event, rule, instance
             var ev = await service.CreateEventAsync("E1", "Ev 1");
             var rp = new RewardPoints(Guid.NewGuid(), 150);
             await ptsRepo.AddAsync(rp);
             await service.AddRewardRuleAsync(ev.Id, rank: 1, rewardPointsId: rp.Id);
+
             var inst = new EventInstance(Guid.NewGuid(), ev.Id);
             await instRepo.AddAsync(inst);
 
-            // Act
             await service.AssignWinnerAsync(inst.Id, userId, rank: 1);
 
-            // Assert balance and transaction count
             var updated = await accRepo.GetByUserIdAsync(userId);
             Assert.Equal(150, updated!.RewardBalance);
 
@@ -139,11 +135,10 @@ namespace Tests.Application.Tests
             var ev = await service.CreateEventAsync("EV2", "Event2");
             var rp = new RewardPoints(Guid.NewGuid(), 200);
             await ptsRepo.AddAsync(rp);
-            // Note: no rule added for rank 2
+
             var inst = new EventInstance(Guid.NewGuid(), ev.Id);
             await instRepo.AddAsync(inst);
 
-            // user account
             var userAccount = new UserAccount(Guid.NewGuid());
             await accRepo.AddAsync(userAccount);
 
@@ -157,13 +152,11 @@ namespace Tests.Application.Tests
             var service = BuildService(out var defRepo, out var ruleRepo, out var instRepo, out var accRepo, out var txRepo, out var ptsRepo);
 
             var ev = await service.CreateEventAsync("EV3", "Event3");
-            // Add a reward rule that points to a non-existent RewardPointsId
             await service.AddRewardRuleAsync(ev.Id, 1, Guid.NewGuid());
 
             var inst = new EventInstance(Guid.NewGuid(), ev.Id);
             await instRepo.AddAsync(inst);
 
-            // user account
             var userAccount = new UserAccount(Guid.NewGuid());
             await accRepo.AddAsync(userAccount);
 
@@ -180,6 +173,7 @@ namespace Tests.Application.Tests
             var rp = new RewardPoints(Guid.NewGuid(), 300);
             await ptsRepo.AddAsync(rp);
             await service.AddRewardRuleAsync(ev.Id, 1, rp.Id);
+
             var inst = new EventInstance(Guid.NewGuid(), ev.Id);
             await instRepo.AddAsync(inst);
 
@@ -196,13 +190,15 @@ namespace Tests.Application.Tests
             var rp = new RewardPoints(Guid.NewGuid(), 100);
             await ptsRepo.AddAsync(rp);
             await service.AddRewardRuleAsync(ev.Id, 1, rp.Id);
+
             var inst = new EventInstance(Guid.NewGuid(), ev.Id);
             await instRepo.AddAsync(inst);
+
             var userAccount = new UserAccount(Guid.NewGuid());
             await accRepo.AddAsync(userAccount);
 
-            await Assert.ThrowsAsync<ValidationException>(() => service.AssignWinnerAsync(inst.Id, userAccount.Id, 0));
-            await Assert.ThrowsAsync<ValidationException>(() => service.AssignWinnerAsync(inst.Id, userAccount.Id, -1));
+            await Assert.ThrowsAsync<ArgumentException>(() => service.AssignWinnerAsync(inst.Id, userAccount.Id, 0));
+            await Assert.ThrowsAsync<ArgumentException>(() => service.AssignWinnerAsync(inst.Id, userAccount.Id, -1));
         }
 
         [Fact]
@@ -225,15 +221,13 @@ namespace Tests.Application.Tests
             var userAccount = new UserAccount(Guid.NewGuid());
             await accRepo.AddAsync(userAccount);
 
-            // Assign rank 1 winner
-            await service.AssignWinnerAsync(inst.Id, userAccount.Id, 1);
-            // Assign rank 2 winner for same user and instance
-            await service.AssignWinnerAsync(inst.Id, userAccount.Id, 2);
+            await service.AssignWinnerAsync(inst.Id, userAccount.UserId, 1);
+            await service.AssignWinnerAsync(inst.Id, userAccount.UserId, 2);
 
-            var updated = await accRepo.GetByUserIdAsync(userAccount.Id);
+            var updated = await accRepo.GetByUserIdAsync(userAccount.UserId);
             Assert.Equal(80, updated!.RewardBalance);
 
-            var txs = await txRepo.GetByUserIdAsync(userAccount.Id);
+            var txs = await txRepo.GetByUserIdAsync(userAccount.UserId);
             Assert.Equal(2, txs.Count());
         }
 
@@ -274,6 +268,7 @@ namespace Tests.Application.Tests
             var rp = new RewardPoints(Guid.NewGuid(), largePoints);
             await ptsRepo.AddAsync(rp);
             await service.AddRewardRuleAsync(ev.Id, 1, rp.Id);
+
             var inst = new EventInstance(Guid.NewGuid(), ev.Id);
             await instRepo.AddAsync(inst);
 
@@ -289,6 +284,5 @@ namespace Tests.Application.Tests
             Assert.Single(txs);
             Assert.Equal(largePoints, txs.First().PointsDelta);
         }
-
     }
 }

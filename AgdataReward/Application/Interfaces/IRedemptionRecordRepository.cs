@@ -11,5 +11,8 @@ namespace Application.Interfaces
     {
         Task<RedemptionRecord?> GetByIdAsync(Guid id);
         Task AddAsync(RedemptionRecord record);
+        Task<IEnumerable<RedemptionRecord>> GetAllAsync();
     }
+
+
 }

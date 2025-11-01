@@ -15,17 +15,17 @@ namespace Domain.Entities.Reward
     {
         public Guid Id { get; private set; } // Primary Key
         public Guid UserId { get; private set; } // FK to UserAccount
-        public int PointsDelta { get; private set; }
-        public string Notes { get; private set; } = string.Empty;
-        public TransactionType TransactionType { get; private set; }
-        public DateTime CreatedAt { get; private set; }
+        public int PointsDelta { get; private set; } // Positive for credit, negative for debit
+        public string Notes { get; private set; } = string.Empty; // Description or reason for the transaction
+        public TransactionType TransactionType { get; private set; } // Credit or Debit
+        public DateTime CreatedAt { get; private set; } // Timestamp of the transaction
         public Guid? EventId { get; private set; } // Optional FK to EventInstance
         public Guid? RedemptionId { get; private set; } // Optional FK to RedemptionRequest
-        public virtual UserAccount? UserAccount { get; private set; }
-        public virtual Event.EventInstance? EventInstance { get; private set; }
-        public virtual Redemption.RedemptionRequest? RedemptionRequest { get; private set; }
+        public virtual UserAccount? UserAccount { get; private set; } // Navigation property to UserAccount
+        public virtual Event.EventInstance? EventInstance { get; private set; } // Navigation property to EventInstance
+        public virtual Redemption.RedemptionRequest? RedemptionRequest { get; private set; } // Navigation property to RedemptionRequest
 
-        protected RewardTransaction() { }
+        protected RewardTransaction() { } // For ORM
 
         public RewardTransaction(Guid userId, int pointsDelta, string notes, TransactionType transactionType, Guid? eventId = null, Guid? redemptionId = null)
         {

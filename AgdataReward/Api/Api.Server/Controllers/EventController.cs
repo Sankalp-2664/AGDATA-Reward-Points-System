@@ -1,59 +1,76 @@
 ﻿using Application.Interfaces;
-using Domain.Entities.Event;
+using Api.Server.DTOs;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Api.Server.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    public class EventController : ControllerBase
+    public class EventsController : ControllerBase
     {
         private readonly IEventService _eventService;
 
-        public EventController(IEventService eventService)
+        public EventsController(IEventService eventService)
         {
             _eventService = eventService;
         }
 
-        // GET: api/event/{id}
+        // GET: api/events/{id}
         [HttpGet("{id:guid}")]
         public async Task<IActionResult> GetEvent(Guid id)
         {
             var ev = await _eventService.GetEventByIdAsync(id);
-            if (ev == null) return NotFound();
-            return Ok(ev);
+            if (ev == null)
+                return NotFound();
+
+            return Ok(EventDto.FromDomain(ev));
         }
 
-        // GET: api/event
+        // GET: api/events
         [HttpGet]
         public async Task<IActionResult> GetAllEvents()
         {
             var events = await _eventService.ListEventsAsync();
-            return Ok(events);
+            var dtos = events.Select(EventDto.FromDomain);
+            return Ok(dtos);
         }
 
-        // POST: api/event
+        // POST: api/events
         [HttpPost]
-        public async Task<IActionResult> CreateEvent([FromBody] EventDefinition dto)
+        public async Task<IActionResult> CreateEvent([FromBody] CreateEventRequest request)
         {
-            var ev = await _eventService.CreateEventAsync(dto.Code, dto.Title);
-            return CreatedAtAction(nameof(GetEvent), new { id = ev.Id }, ev);
+            try
+            {
+                var ev = await _eventService.CreateEventAsync(request.Code, request.Title);
+                var dto = EventDto.FromDomain(ev);
+
+                return CreatedAtAction(nameof(GetEvent), new { id = dto.Id }, dto);
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(new { error = ex.Message });
+            }
         }
 
-        // POST: api/event/{eventId}/rewardrule
+        // POST: api/events/{eventId}/rewardrule
         [HttpPost("{eventId:guid}/rewardrule")]
-        public async Task<IActionResult> AddRewardRule(Guid eventId, [FromQuery] int rank, [FromQuery] Guid rewardPointsId)
+        public async Task<IActionResult> AddRewardRule(Guid eventId, [FromBody] AddRewardRuleRequest request)
         {
-            await _eventService.AddRewardRuleAsync(eventId, rank, rewardPointsId);
+            await _eventService.AddRewardRuleAsync(eventId, request.Rank, request.RewardPointsId);
             return Ok();
         }
 
-        // POST: api/event/{instanceId}/assignwinner
+        // POST: api/events/{instanceId}/assignwinner
         [HttpPost("{instanceId:guid}/assignwinner")]
-        public async Task<IActionResult> AssignWinner(Guid instanceId, [FromQuery] Guid userId, [FromQuery] int rank)
+        public async Task<IActionResult> AssignWinner(Guid instanceId, [FromBody] AssignWinnerRequest request)
         {
-            await _eventService.AssignWinnerAsync(instanceId, userId, rank);
+            await _eventService.AssignWinnerAsync(instanceId, request.UserId, request.Rank);
             return Ok();
         }
     }
+
+    // Request DTOs
+    public record CreateEventRequest(string Code, string Title);
+    public record AddRewardRuleRequest(int Rank, Guid RewardPointsId);
+    public record AssignWinnerRequest(Guid UserId, int Rank);
 }

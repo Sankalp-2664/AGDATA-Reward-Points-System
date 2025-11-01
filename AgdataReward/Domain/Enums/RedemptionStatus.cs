@@ -12,6 +12,5 @@ namespace Domain.Enums
         Approved,   // Admin approved, ready to process
         Rejected,   // Admin rejected
         Completed,  // Fulfilled
-        Cancelled   // User cancelled
     }
 }

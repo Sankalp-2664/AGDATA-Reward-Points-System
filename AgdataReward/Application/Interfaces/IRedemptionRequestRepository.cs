@@ -11,5 +11,11 @@ namespace Application.Interfaces
     {
         Task<RedemptionRequest?> GetByIdAsync(Guid redemptionId);
         Task UpdateAsync(RedemptionRequest process);
+        Task<IEnumerable<RedemptionRequest>> GetPendingOrActiveByUserAndProductAsync(
+            Guid userId,
+            Guid productId,
+            IEnumerable<RedemptionRecord> allRedemptionRecords
+        );
+
     }
 }

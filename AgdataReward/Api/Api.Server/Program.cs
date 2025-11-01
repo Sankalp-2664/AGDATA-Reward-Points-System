@@ -1,6 +1,8 @@
 using Application.Interfaces;
 using Application.Services;
+using Infrastructure.Persistence;
 using Infrastructure.Persistence.Repositories;
+using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -8,6 +10,10 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+
+
+builder.Services.AddDbContext<RewardDbContext>(options =>
+    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 // ?? Register In-Memory Repositories for Milestone 1
 builder.Services.AddSingleton<IUserRepository, InMemoryUserRepository>();

@@ -38,12 +38,10 @@ namespace Application.Services
 
         public async Task<EventDefinition> CreateEventAsync(string code, string title)
         {
-            if (string.IsNullOrWhiteSpace(code))
-                throw new ValidationException("Event code cannot be null or empty.");
-            if (string.IsNullOrWhiteSpace(title))
-                throw new ValidationException("Event title cannot be null or empty.");
+            var cleanCode = code?.Trim() ?? string.Empty;
+            var cleanTitle = title?.Trim() ?? string.Empty;
 
-            var definition = new EventDefinition(Guid.NewGuid(), code.Trim(), title.Trim());
+            var definition = new EventDefinition(Guid.NewGuid(), cleanCode.Trim(), cleanTitle.Trim());
             await _definitionRepo.AddAsync(definition);
             return definition;
         }

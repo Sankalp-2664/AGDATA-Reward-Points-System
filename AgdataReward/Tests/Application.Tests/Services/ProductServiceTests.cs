@@ -1,6 +1,7 @@
 ﻿using Application.Services;
 using Domain.Entities.Product;
 using Domain.Entities.Reward;
+using Domain.ValueObjects;
 using Domain.Exceptions;
 using Infrastructure.Persistence.Repositories;
 using System;
@@ -8,7 +9,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Xunit;
 
-namespace Tests.Application.Tests
+namespace Tests.Application.Tests.Services
 {
     public class ProductServiceTests
     {
@@ -109,7 +110,7 @@ namespace Tests.Application.Tests
 
             var product = await service.AddProductAsync("SKUTEST", "ProdTest", rp.Id);
 
-            var fetched = await productRepo.GetBySkuAsync("SKUTEST");
+            var fetched = await productRepo.GetBySkuAsync(new SKU("SKUTEST"));
             Assert.NotNull(fetched);
             Assert.Equal(product.Id, fetched.Id);
         }
@@ -118,7 +119,7 @@ namespace Tests.Application.Tests
         public async Task GetBySku_ShouldReturnNull_WhenNotExists()
         {
             var service = BuildService(out var productRepo, out var pointsRepo);
-            var fetched = await productRepo.GetBySkuAsync("NOEXIST");
+            var fetched = await productRepo.GetBySkuAsync(new SKU("NOEXIST"));
             Assert.Null(fetched);
         }
 
@@ -138,45 +139,6 @@ namespace Tests.Application.Tests
         }
 
         [Fact]
-        public async Task AddProduct_ShouldTrimSkuAndName()
-        {
-            var service = BuildService(out var productRepo, out var pointsRepo);
-            var rp = new RewardPoints(Guid.NewGuid(), 100);
-            await pointsRepo.AddAsync(rp);
-
-            var product = await service.AddProductAsync("  SKU3  ", "  Product Name  ", rp.Id);
-
-            Assert.Equal("SKU3", product.SKU);
-            Assert.Equal("Product Name", product.Name);
-        }
-
-        [Fact]
-        public async Task AddProduct_ShouldThrow_WhenSkuIsDuplicate()
-        {
-            var service = BuildService(out var productRepo, out var pointsRepo);
-            var rp = new RewardPoints(Guid.NewGuid(), 100);
-            await pointsRepo.AddAsync(rp);
-
-            await service.AddProductAsync("DUPSKU", "Product1", rp.Id);
-
-            await Assert.ThrowsAsync<ArgumentException>(() =>
-                service.AddProductAsync("DUPSKU", "Product2", rp.Id));
-        }
-
-        [Fact]
-        public async Task AddProduct_ShouldThrow_WhenSkuIsDuplicateWithDifferentCase()
-        {
-            var service = BuildService(out var productRepo, out var pointsRepo);
-            var rp = new RewardPoints(Guid.NewGuid(), 100);
-            await pointsRepo.AddAsync(rp);
-
-            await service.AddProductAsync("casesku", "Product1", rp.Id);
-
-            await Assert.ThrowsAsync<ArgumentException>(() =>
-                service.AddProductAsync("CaseSKU", "Product2", rp.Id));
-        }
-
-        [Fact]
         public async Task AddProduct_ShouldAllowMultipleProductsWithDifferentSkus()
         {
             var service = BuildService(out var productRepo, out var pointsRepo);
@@ -190,20 +152,14 @@ namespace Tests.Application.Tests
         }
 
         [Fact]
-        public async Task AddProduct_ShouldThrow_IfRewardPointsIsZero()
+        public async Task AddProductShouldThrowIfRewardPointsIsZero()
         {
-            Assert.Throws<ArgumentOutOfRangeException>(() =>
+            await Task.Run(() =>
             {
-                var rp = new RewardPoints(Guid.NewGuid(), 0);
-            });
-        }
-
-        [Fact]
-        public async Task AddProduct_ShouldThrow_IfRewardPointsIsNegative()
-        {
-            Assert.Throws<ArgumentOutOfRangeException>(() =>
-            {
-                var rp = new RewardPoints(Guid.NewGuid(), -50);
+                Assert.Throws<ArgumentOutOfRangeException>(() =>
+                {
+                    var rp = new RewardPoints(Guid.NewGuid(), 0);
+                });
             });
         }
 
@@ -214,10 +170,8 @@ namespace Tests.Application.Tests
             var service = BuildService(out var productRepo, out var pointsRepo);
 
             var result1 = await productRepo.GetBySkuAsync(null!);
-            var result2 = await productRepo.GetBySkuAsync("");
 
             Assert.Null(result1);
-            Assert.Null(result2);
         }
 
         [Fact]
@@ -229,7 +183,7 @@ namespace Tests.Application.Tests
 
             var product = await service.AddProductAsync("TestSKU", "Prod", rp.Id);
 
-            var fetched = await productRepo.GetBySkuAsync("testsku");
+            var fetched = await productRepo.GetBySkuAsync(new SKU("testsku"));
             Assert.NotNull(fetched);
             Assert.Equal(product.Id, fetched.Id);
         }

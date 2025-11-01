@@ -1,6 +1,8 @@
 ﻿using Application.Interfaces;
 using Microsoft.AspNetCore.Mvc;
-using Domain.Entities.Product;
+using Api.Server.DTOs;
+using System;
+using System.Threading.Tasks;
 
 namespace Api.Server.Controllers
 {
@@ -19,10 +21,20 @@ namespace Api.Server.Controllers
 
         // POST: api/product
         [HttpPost]
-        public async Task<IActionResult> CreateProduct([FromBody] ProductInfo dto)
+        public async Task<IActionResult> CreateProduct([FromBody] ProductDto dto)
         {
-            var product = await _productService.AddProductAsync(dto.SKU, dto.Name, dto.RewardPointsId);
-            return Ok(product);
+            var product = await _productService.AddProductAsync(dto.Sku, dto.Name, dto.RewardPointsId);
+
+            var resultDto = new ProductDto
+            {
+                ProductId = product.Id,
+                Sku = product.SKU.Value,  
+                Name = product.Name,
+                RewardPointsId = product.RewardPointsId,
+                Stock = 0 
+            };
+
+            return Ok(resultDto);
         }
 
         // PUT: api/product/{productId}/stock

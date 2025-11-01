@@ -1,15 +1,17 @@
 ﻿using Application.Services;
 using Domain.Entities.Product;
+using Domain.Entities.Redemption;
 using Domain.Entities.Reward;
 using Domain.Entities.User;
 using Domain.Enums;
+using Domain.ValueObjects;
 using Domain.Exceptions;
 using Infrastructure.Persistence.Repositories;
 using System;
 using System.Threading.Tasks;
 using Xunit;
 
-namespace Tests.Application.Tests
+namespace Tests.Application.Tests.Services
 {
 	public class RedemptionServiceNegativeTests
 	{
@@ -52,7 +54,7 @@ namespace Tests.Application.Tests
 			var rewardPoints = new RewardPoints(Guid.NewGuid(), 100); // Product costs 100 points
 			await pointsRepo.AddAsync(rewardPoints);
 
-			var product = new ProductInfo(Guid.NewGuid(), "SKU1", "T-Shirt", rewardPoints.Id);
+			var product = new ProductInformation(Guid.NewGuid(), new SKU("SKU1"), "T-Shirt", rewardPoints.Id);
 			await productRepo.AddAsync(product);
 
 			var inventory = new ProductInventory(Guid.NewGuid(), product.Id, 5);
@@ -80,7 +82,7 @@ namespace Tests.Application.Tests
 			var rewardPoints = new RewardPoints(Guid.NewGuid(), 100);
 			await pointsRepo.AddAsync(rewardPoints);
 
-			var product = new ProductInfo(Guid.NewGuid(), "SKU2", "Coffee Mug", rewardPoints.Id);
+			var product = new ProductInformation(Guid.NewGuid(), new SKU("SKU2"), "Coffee Mug", rewardPoints.Id);
 			await productRepo.AddAsync(product);
 
 			var inventory = new ProductInventory(Guid.NewGuid(), product.Id, 0); // Out of stock
@@ -108,7 +110,7 @@ namespace Tests.Application.Tests
 			var rewardPoints = new RewardPoints(Guid.NewGuid(), 100);
 			await pointsRepo.AddAsync(rewardPoints);
 
-			var product = new ProductInfo(Guid.NewGuid(), "SKU3", "Headphones", rewardPoints.Id);
+			var product = new ProductInformation(Guid.NewGuid(), new SKU("SKU3"), "Headphones", rewardPoints.Id);
 			await productRepo.AddAsync(product);
 
 			var inventory = new ProductInventory(Guid.NewGuid(), product.Id, 5);
@@ -142,7 +144,7 @@ namespace Tests.Application.Tests
 			var rewardPoints = new RewardPoints(Guid.NewGuid(), 100);
 			await pointsRepo.AddAsync(rewardPoints);
 
-			var product = new ProductInfo(Guid.NewGuid(), "SKU4", "Backpack", rewardPoints.Id);
+			var product = new ProductInformation(Guid.NewGuid(), new SKU("SKU4"), "Backpack", rewardPoints.Id);
 			await productRepo.AddAsync(product);
 
 			var inventory = new ProductInventory(Guid.NewGuid(), product.Id, 5);
@@ -176,7 +178,7 @@ namespace Tests.Application.Tests
 			var rewardPoints = new RewardPoints(Guid.NewGuid(), 100);
 			await pointsRepo.AddAsync(rewardPoints);
 
-			var product = new ProductInfo(Guid.NewGuid(), "SKU5", "Laptop Sleeve", rewardPoints.Id);
+			var product = new ProductInformation(Guid.NewGuid(), new SKU("SKU5"), "Laptop Sleeve", rewardPoints.Id);
 			await productRepo.AddAsync(product);
 
 			var inventory = new ProductInventory(Guid.NewGuid(), product.Id, 5);
@@ -188,5 +190,45 @@ namespace Tests.Application.Tests
 			await Assert.ThrowsAsync<InvalidOperationException>(() =>
 				service.CompleteRedemptionAsync(redemptionRecord.Id));
 		}
-	}
+
+        [Fact]
+        public async Task GetPendingOrActiveByUserAndProductAsync_ShouldReturnOnlyPendingOrApproved()
+        {
+            // Arrange
+            var recordRepo = new InMemoryRedemptionRecordRepository();
+            var requestRepo = new InMemoryRedemptionRequestRepository();
+
+            var userId = Guid.NewGuid();
+            var productId = Guid.NewGuid();
+
+            // Create redemption records
+            var recordPending = new RedemptionRecord(Guid.NewGuid(), userId, productId);
+            var recordApproved = new RedemptionRecord(Guid.NewGuid(), userId, productId);
+            var recordRejected = new RedemptionRecord(Guid.NewGuid(), userId, productId);
+
+            await recordRepo.AddAsync(recordPending);
+            await recordRepo.AddAsync(recordApproved);
+            await recordRepo.AddAsync(recordRejected);
+
+            // Create requests linked to records
+            var pendingRequest = new RedemptionRequest(recordPending.Id, 100); // Pending by default
+            var approvedRequest = new RedemptionRequest(recordApproved.Id, 50);
+            approvedRequest.Approve();
+            var rejectedRequest = new RedemptionRequest(recordRejected.Id, 20);
+            rejectedRequest.Reject();
+
+            await requestRepo.UpdateAsync(pendingRequest);
+            await requestRepo.UpdateAsync(approvedRequest);
+            await requestRepo.UpdateAsync(rejectedRequest);
+
+            // Act
+            var allRecords = await recordRepo.GetAllAsync();
+            var results = (await requestRepo.GetPendingOrActiveByUserAndProductAsync(userId, productId, allRecords)).ToList();
+
+            // Assert
+            Assert.Contains(results, r => r.Id == pendingRequest.Id);
+            Assert.Contains(results, r => r.Id == approvedRequest.Id);
+            Assert.DoesNotContain(results, r => r.Id == rejectedRequest.Id);
+        }
+    }
 }

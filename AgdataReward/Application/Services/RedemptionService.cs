@@ -3,132 +3,126 @@ using Domain.Entities.Redemption;
 using Domain.Entities.Reward;
 using Domain.Enums;
 using Domain.Exceptions;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace Application.Services
+namespace Application.Services;
+
+public class RedemptionService : IRedemptionService
 {
-    public class RedemptionService : IRedemptionService
+    private readonly IRedemptionRecordRepository _recordRepo;
+    private readonly IRedemptionRequestRepository _processRepo;
+    private readonly IUserAccountRepository _accountRepo;
+    private readonly IProductRepository _productRepo;
+    private readonly IProductInventoryRepository _inventoryRepo;
+    private readonly IRewardPointsRepository _rewardPointsRepo;
+    private readonly IRewardTransactionRepository _transactionRepo;
+
+    public RedemptionService(
+        IRedemptionRecordRepository recordRepo,
+        IRedemptionRequestRepository processRepo,
+        IUserAccountRepository accountRepo,
+        IProductRepository productRepo,
+        IProductInventoryRepository inventoryRepo,
+        IRewardPointsRepository rewardPointsRepo,
+        IRewardTransactionRepository transactionRepo)
     {
-        private readonly IRedemptionRecordRepository _recordRepo;
-        private readonly IRedemptionRequestRepository _processRepo;
-        private readonly IUserAccountRepository _accountRepo;
-        private readonly IProductRepository _productRepo;
-        private readonly IProductInventoryRepository _inventoryRepo;
-        private readonly IRewardPointsRepository _rewardPointsRepo;
-        private readonly IRewardTransactionRepository _transactionRepo;
+        _recordRepo = recordRepo;
+        _processRepo = processRepo;
+        _accountRepo = accountRepo;
+        _productRepo = productRepo;
+        _inventoryRepo = inventoryRepo;
+        _rewardPointsRepo = rewardPointsRepo;
+        _transactionRepo = transactionRepo;
+    }
+    
+    public async Task<RedemptionRecord> RequestRedemptionAsync(Guid userId, Guid productId)
+    { 
+        var product = await _productRepo.GetByIdAsync(productId) ?? throw new ArgumentException("Invalid product.");
+        var inventory = await _inventoryRepo.GetByProductIdAsync(productId) ?? throw new ArgumentException("No inventory.");
+        var rewardPoints = await _rewardPointsRepo.GetByIdAsync(product.RewardPointsId) ?? throw new ArgumentException("Invalid reward points configuration.");
+        var account = await _accountRepo.GetByUserIdAsync(userId) ?? throw new ArgumentException("Invalid user.");
 
-        public RedemptionService(
-            IRedemptionRecordRepository recordRepo,
-            IRedemptionRequestRepository processRepo,
-            IUserAccountRepository accountRepo,
-            IProductRepository productRepo,
-            IProductInventoryRepository inventoryRepo,
-            IRewardPointsRepository rewardPointsRepo,
-            IRewardTransactionRepository transactionRepo)
+        if (account.RewardBalance < rewardPoints.PointsValue)
+            throw new InsufficientPointsException(account.RewardBalance, rewardPoints.PointsValue);
+
+        if (inventory.StockQuantity <= 0)
+            throw new InvalidRedemptionException("Product is out of stock.");
+
+        var allRecords = await _recordRepo.GetAllAsync();
+        var existingRequests = await _processRepo.GetPendingOrActiveByUserAndProductAsync(userId, productId, allRecords);
+        foreach (var req in existingRequests)
         {
-            _recordRepo = recordRepo;
-            _processRepo = processRepo;
-            _accountRepo = accountRepo;
-            _productRepo = productRepo;
-            _inventoryRepo = inventoryRepo;
-            _rewardPointsRepo = rewardPointsRepo;
-            _transactionRepo = transactionRepo;
-        }
-        
-        public async Task<RedemptionRecord> RequestRedemptionAsync(Guid userId, Guid productId)
-        { 
-            var product = await _productRepo.GetByIdAsync(productId) ?? throw new ArgumentException("Invalid product.");
-            var inventory = await _inventoryRepo.GetByProductIdAsync(productId) ?? throw new ArgumentException("No inventory.");
-            var rewardPoints = await _rewardPointsRepo.GetByIdAsync(product.RewardPointsId) ?? throw new ArgumentException("Invalid reward points configuration.");
-            var account = await _accountRepo.GetByUserIdAsync(userId) ?? throw new ArgumentException("Invalid user.");
-
-            if (account.RewardBalance < rewardPoints.PointsValue)
-                throw new InsufficientPointsException(account.RewardBalance, rewardPoints.PointsValue);
-
-            if (inventory.StockQuantity <= 0)
-                throw new InvalidRedemptionException("Product is out of stock.");
-
-            var allRecords = await _recordRepo.GetAllAsync();
-            var existingRequests = await _processRepo.GetPendingOrActiveByUserAndProductAsync(userId, productId, allRecords);
-            foreach (var req in existingRequests)
+            var existingRecord = await _recordRepo.GetByIdAsync(req.RedemptionId);
+            if (existingRecord != null && existingRecord.ProductId == productId && existingRecord.UserId == userId)
             {
-                var existingRecord = await _recordRepo.GetByIdAsync(req.RedemptionId);
-                if (existingRecord != null && existingRecord.ProductId == productId && existingRecord.UserId == userId)
-                {
-                    throw new InvalidRedemptionException("A pending or active redemption for this product already exists.");
-                }
+                throw new InvalidRedemptionException("A pending or active redemption for this product already exists.");
             }
-
-            // Create record + process
-            var record = new RedemptionRecord(Guid.NewGuid(), userId, productId);
-            await _recordRepo.AddAsync(record);
-
-            var request = new RedemptionRequest(record.Id, rewardPoints.PointsValue);
-            await _processRepo.UpdateAsync(request);
-
-            return record;
         }
 
-        public async Task ApproveRedemptionAsync(Guid redemptionId)
-        {
-            var process = await _processRepo.GetByIdAsync(redemptionId) ?? throw new ArgumentException("Invalid redemption.");
-            process.Approve();
-            await _processRepo.UpdateAsync(process);
-        }
+        // Create record + process
+        var record = new RedemptionRecord(Guid.NewGuid(), userId, productId);
+        await _recordRepo.AddAsync(record);
 
-        public async Task RejectRedemptionAsync(Guid redemptionId)
-        {
-            var process = await _processRepo.GetByIdAsync(redemptionId) ?? throw new ArgumentException("Invalid redemption.");
-            process.Reject();
-            await _processRepo.UpdateAsync(process);
-        }
+        var request = new RedemptionRequest(record.Id, rewardPoints.PointsValue);
+        await _processRepo.UpdateAsync(request);
 
-        public async Task CompleteRedemptionAsync(Guid redemptionId)
-        {
-            var process = await _processRepo.GetByIdAsync(redemptionId)
-                          ?? throw new ArgumentException("Invalid redemption.");
+        return record;
+    }
 
-            if (process.Status != RedemptionStatus.Approved)
-                throw new InvalidOperationException("Redemption must be approved before completion.");
+    public async Task ApproveRedemptionAsync(Guid redemptionId)
+    {
+        var process = await _processRepo.GetByIdAsync(redemptionId) ?? throw new ArgumentException("Invalid redemption.");
+        process.Approve();
+        await _processRepo.UpdateAsync(process);
+    }
 
-            // Get related record
-            var record = await _recordRepo.GetByIdAsync(redemptionId)
-                         ?? throw new ArgumentException("Invalid redemption record.");
+    public async Task RejectRedemptionAsync(Guid redemptionId)
+    {
+        var process = await _processRepo.GetByIdAsync(redemptionId) ?? throw new ArgumentException("Invalid redemption.");
+        process.Reject();
+        await _processRepo.UpdateAsync(process);
+    }
 
-            var product = await _productRepo.GetByIdAsync(record.ProductId)
-                          ?? throw new ArgumentException("Invalid product.");
-            var rewardPoints = await _rewardPointsRepo.GetByIdAsync(product.RewardPointsId)
-                               ?? throw new ArgumentException("Invalid reward points configuration.");
+    public async Task CompleteRedemptionAsync(Guid redemptionId)
+    {
+        var process = await _processRepo.GetByIdAsync(redemptionId)
+                      ?? throw new ArgumentException("Invalid redemption.");
 
-            // Deduct points from user account
-            var account = await _accountRepo.GetByUserIdAsync(record.UserId)
-                          ?? throw new ArgumentException("Invalid user account.");
+        if (process.Status != RedemptionStatus.Approved)
+            throw new InvalidOperationException("Redemption must be approved before completion.");
 
-            var transaction = new RewardTransaction(
-                account.UserId,
-                -rewardPoints.PointsValue,
-                $"Redeemed product {product.Name}",
-                TransactionType.Debit,
-                redemptionId: redemptionId
-            );
+        // Get related record
+        var record = await _recordRepo.GetByIdAsync(redemptionId)
+                     ?? throw new ArgumentException("Invalid redemption record.");
 
-            account.RedeemPoints(rewardPoints.PointsValue, transaction);
-            await _accountRepo.UpdateAsync(account);
-            await _transactionRepo.AddAsync(transaction);
+        var product = await _productRepo.GetByIdAsync(record.ProductId)
+                      ?? throw new ArgumentException("Invalid product.");
+        var rewardPoints = await _rewardPointsRepo.GetByIdAsync(product.RewardPointsId)
+                           ?? throw new ArgumentException("Invalid reward points configuration.");
 
-            // Update product inventory
-            var inventory = await _inventoryRepo.GetByProductIdAsync(product.Id)
-                            ?? throw new ArgumentException("Invalid inventory.");
-            inventory.ReduceStock(1);
-            await _inventoryRepo.UpdateAsync(inventory);
+        // Deduct points from user account
+        var account = await _accountRepo.GetByUserIdAsync(record.UserId)
+                      ?? throw new ArgumentException("Invalid user account.");
 
-            // Mark process complete
-            process.MarkCompleted();
-            await _processRepo.UpdateAsync(process);
-        }
+        var transaction = new RewardTransaction(
+            account.UserId,
+            -rewardPoints.PointsValue,
+            $"Redeemed product {product.Name}",
+            TransactionType.Debit,
+            redemptionId: redemptionId
+        );
+
+        account.RedeemPoints(rewardPoints.PointsValue, transaction);
+        await _accountRepo.UpdateAsync(account);
+        await _transactionRepo.AddAsync(transaction);
+
+        // Update product inventory
+        var inventory = await _inventoryRepo.GetByProductIdAsync(product.Id)
+                        ?? throw new ArgumentException("Invalid inventory.");
+        inventory.ReduceStock(1);
+        await _inventoryRepo.UpdateAsync(inventory);
+
+        // Mark process complete
+        process.MarkCompleted();
+        await _processRepo.UpdateAsync(process);
     }
 }

@@ -1,116 +1,160 @@
 ﻿using Domain.Entities.Redemption;
 using Domain.Enums;
 using FluentAssertions;
-using System;
-using Xunit;
 
-namespace Tests.Domain.Tests.Entities
+namespace Tests.Domain.Tests.Entities;
+
+public class RedemptionRequestTests
 {
-    public class RedemptionRequestTests
+    [Fact]
+    public void Constructor_Should_Throw_When_PointsUsed_Is_NonPositive()
     {
-        [Fact]
-        public void Constructor_Should_Throw_When_PointsUsed_Is_NonPositive()
-        {
-            Action act1 = () => new RedemptionRequest(Guid.NewGuid(), 0);
-            Action act2 = () => new RedemptionRequest(Guid.NewGuid(), -10);
+        // Arrange
+        var id1 = Guid.NewGuid();
+        var id2 = Guid.NewGuid();
 
-            act1.Should().Throw<ArgumentException>().WithMessage("*PointsUsed must be positive*");
-            act2.Should().Throw<ArgumentException>().WithMessage("*PointsUsed must be positive*");
-        }
+        // Act
+        Action act1 = () => new RedemptionRequest(id1, 0);
+        Action act2 = () => new RedemptionRequest(id2, -10);
 
-        [Fact]
-        public void Constructor_Should_Initialize_Values_Correctly()
-        {
-            var redemptionId = Guid.NewGuid();
-            int pointsUsed = 100;
-            var request = new RedemptionRequest(redemptionId, pointsUsed);
+        // Assert
+        act1.Should().Throw<ArgumentException>().WithMessage("*PointsUsed must be positive*");
+        act2.Should().Throw<ArgumentException>().WithMessage("*PointsUsed must be positive*");
+    }
 
-            request.RedemptionId.Should().Be(redemptionId);
-            request.PointsUsed.Should().Be(pointsUsed);
-            request.Status.Should().Be(RedemptionStatus.Pending);
-            request.CreatedAt.Should().BeCloseTo(DateTime.UtcNow, TimeSpan.FromSeconds(1));
-            request.Id.Should().NotBeEmpty();
-        }
+    [Fact]
+    public void Constructor_Should_Initialize_Values_Correctly()
+    {
+        // Arrange
+        var redemptionId = Guid.NewGuid();
+        int pointsUsed = 100;
 
-        [Fact]
-        public void Approve_Should_Set_Status_To_Approved()
-        {
-            var request = new RedemptionRequest(Guid.NewGuid(), 50);
-            request.Approve();
-            request.Status.Should().Be(RedemptionStatus.Approved);
-        }
+        // Act
+        var request = new RedemptionRequest(redemptionId, pointsUsed);
 
-        [Fact]
-        public void Reject_Should_Set_Status_To_Rejected()
-        {
-            var request = new RedemptionRequest(Guid.NewGuid(), 50);
-            request.Reject();
-            request.Status.Should().Be(RedemptionStatus.Rejected);
-        }
+        // Assert
+        request.RedemptionId.Should().Be(redemptionId);
+        request.PointsUsed.Should().Be(pointsUsed);
+        request.Status.Should().Be(RedemptionStatus.Pending);
+        request.CreatedAt.Should().BeCloseTo(DateTime.UtcNow, TimeSpan.FromSeconds(1));
+        request.Id.Should().NotBeEmpty();
+    }
 
-        [Fact]
-        public void MarkCompleted_Should_Set_Status_To_Completed_When_Approved()
-        {
-            var request = new RedemptionRequest(Guid.NewGuid(), 50);
-            request.Approve();
-            request.MarkCompleted();
-            request.Status.Should().Be(RedemptionStatus.Completed);
-        }
+    [Fact]
+    public void Approve_Should_Set_Status_To_Approved()
+    {
+        // Arrange
+        var request = new RedemptionRequest(Guid.NewGuid(), 50);
 
-        [Fact]
-        public void Approve_Should_Throw_When_Status_Is_Not_Pending()
-        {
-            var request = new RedemptionRequest(Guid.NewGuid(), 50);
-            request.Reject();
-            Action act = () => request.Approve();
-            act.Should().Throw<InvalidOperationException>()
-                .WithMessage("Only Pending redemptions can be approved.");
-        }
+        // Act
+        request.Approve();
 
-        [Fact]
-        public void Reject_Should_Throw_When_Status_Is_Not_Pending()
-        {
-            var request = new RedemptionRequest(Guid.NewGuid(), 50);
-            request.Approve();
-            Action act = () => request.Reject();
-            act.Should().Throw<InvalidOperationException>()
-                .WithMessage("Only Pending redemptions can be rejected.");
-        }
+        // Assert
+        request.Status.Should().Be(RedemptionStatus.Approved);
+    }
 
-        [Fact]
-        public void MarkCompleted_Should_Throw_When_Status_Is_Not_Approved()
-        {
-            var request = new RedemptionRequest(Guid.NewGuid(), 50);
-            Action act1 = () => request.MarkCompleted(); // Pending -> Completed not allowed
-            request.Reject();
-            Action act2 = () => request.MarkCompleted(); // Rejected -> Completed not allowed
+    [Fact]
+    public void Reject_Should_Set_Status_To_Rejected()
+    {
+        // Arrange
+        var request = new RedemptionRequest(Guid.NewGuid(), 50);
 
-            act1.Should().Throw<InvalidOperationException>()
-                .WithMessage("Only Approved redemptions can be completed.");
-            act2.Should().Throw<InvalidOperationException>()
-                .WithMessage("Only Approved redemptions can be completed.");
-        }
+        // Act
+        request.Reject();
 
-        [Fact]
-        public void GetAllowedTransitions_Should_Return_Correct_Statuses()
-        {
-            var request = new RedemptionRequest(Guid.NewGuid(), 50);
+        // Assert
+        request.Status.Should().Be(RedemptionStatus.Rejected);
+    }
 
-            // Pending
-            request.GetAllowedTransitions().Should().BeEquivalentTo(new[] { RedemptionStatus.Approved, RedemptionStatus.Rejected });
+    [Fact]
+    public void MarkCompleted_Should_Set_Status_To_Completed_When_Approved()
+    {
+        // Arrange
+        var request = new RedemptionRequest(Guid.NewGuid(), 50);
+        request.Approve();
 
-            // Approved
-            request.Approve();
-            request.GetAllowedTransitions().Should().BeEquivalentTo(new[] { RedemptionStatus.Completed });
+        // Act
+        request.MarkCompleted();
 
-            // Completed
-            request.MarkCompleted();
-            request.GetAllowedTransitions().Should().BeEmpty();
+        // Assert
+        request.Status.Should().Be(RedemptionStatus.Completed);
+    }
 
-            // Rejected
-            var rejectedRequest = new RedemptionRequest(Guid.NewGuid(), 50);
-            rejectedRequest.Reject();
-            rejectedRequest.GetAllowedTransitions().Should().BeEmpty();
-        }
+    [Fact]
+    public void Approve_Should_Throw_When_Status_Is_Not_Pending()
+    {
+        // Arrange
+        var request = new RedemptionRequest(Guid.NewGuid(), 50);
+        request.Reject();
+
+        // Act
+        Action act = () => request.Approve();
+
+        // Assert
+        act.Should().Throw<InvalidOperationException>()
+            .WithMessage("Only Pending redemptions can be approved.");
+    }
+
+    [Fact]
+    public void Reject_Should_Throw_When_Status_Is_Not_Pending()
+    {
+        // Arrange
+        var request = new RedemptionRequest(Guid.NewGuid(), 50);
+        request.Approve();
+
+        // Act
+        Action act = () => request.Reject();
+
+        // Assert
+        act.Should().Throw<InvalidOperationException>()
+            .WithMessage("Only Pending redemptions can be rejected.");
+    }
+
+    [Fact]
+    public void MarkCompleted_Should_Throw_When_Status_Is_Not_Approved()
+    {
+        // Arrange - pending case
+        var requestPending = new RedemptionRequest(Guid.NewGuid(), 50);
+
+        // Act & Assert - pending -> completed not allowed
+        Action actPending = () => requestPending.MarkCompleted();
+        actPending.Should().Throw<InvalidOperationException>()
+            .WithMessage("Only Approved redemptions can be completed.");
+
+        // Arrange - rejected case
+        var requestRejected = new RedemptionRequest(Guid.NewGuid(), 50);
+        requestRejected.Reject();
+
+        // Act & Assert - rejected -> completed not allowed
+        Action actRejected = () => requestRejected.MarkCompleted();
+        actRejected.Should().Throw<InvalidOperationException>()
+            .WithMessage("Only Approved redemptions can be completed.");
+    }
+
+    [Fact]
+    public void GetAllowedTransitions_Should_Return_Correct_Statuses()
+    {
+        // Arrange
+        var request = new RedemptionRequest(Guid.NewGuid(), 50);
+
+        // Act / Assert - Pending
+        request.GetAllowedTransitions().Should().BeEquivalentTo(new[] { RedemptionStatus.Approved, RedemptionStatus.Rejected });
+
+        // Act - Approved
+        request.Approve();
+
+        // Assert - Approved
+        request.GetAllowedTransitions().Should().BeEquivalentTo(new[] { RedemptionStatus.Completed });
+
+        // Act - Completed
+        request.MarkCompleted();
+
+        // Assert - Completed
+        request.GetAllowedTransitions().Should().BeEmpty();
+
+        // Arrange / Act / Assert - Rejected
+        var rejectedRequest = new RedemptionRequest(Guid.NewGuid(), 50);
+        rejectedRequest.Reject();
+        rejectedRequest.GetAllowedTransitions().Should().BeEmpty();
     }
 }

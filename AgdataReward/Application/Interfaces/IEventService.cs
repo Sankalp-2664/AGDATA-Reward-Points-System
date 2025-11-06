@@ -1,18 +1,12 @@
 ﻿using Domain.Entities.Event;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace Application.Interfaces
+namespace Application.Interfaces;
+
+public interface IEventService
 {
-    public interface IEventService
-    {
-        Task<EventDefinition> CreateEventAsync(string code, string title);
-        Task<EventDefinition?> GetEventByIdAsync(Guid id);
-        Task<IEnumerable<EventDefinition>> ListEventsAsync();
-        Task AddRewardRuleAsync(Guid eventId, int rank, Guid rewardPointsId);
-        Task AssignWinnerAsync(Guid eventInstanceId, Guid userId, int rank);
-    }
+    Task<EventDefinition> CreateEventAsync(string code, string title);
+    Task<EventDefinition?> GetEventByIdAsync(Guid id);
+    Task<IEnumerable<EventDefinition>> ListEventsAsync();
+    Task AddRewardRuleAsync(Guid eventId, int rank, Guid rewardPointsId);
+    Task AssignWinnerAsync(Guid eventInstanceId, Guid userId, int rank);
 }

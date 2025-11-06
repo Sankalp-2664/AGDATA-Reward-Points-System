@@ -1,37 +1,29 @@
-﻿
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿namespace Domain.ValueObjects;
 
-namespace Domain.ValueObjects
+public sealed class Email
 {
-    public sealed class Email
+    public string Value { get; }
+
+    public Email(string value)
     {
-        public string Value { get; }
+        if (string.IsNullOrWhiteSpace(value))
+            throw new ArgumentException("Email cannot be empty.");
 
-        public Email(string value)
-        {
-            if (string.IsNullOrWhiteSpace(value))
-                throw new ArgumentException("Email cannot be empty.");
+        value = value.Trim();
 
-            value = value.Trim();
+        if (!value.Contains("@"))
+            throw new ArgumentException("Invalid email format.");
 
-            if (!value.Contains("@"))
-                throw new ArgumentException("Invalid email format.");
+        if (!value.EndsWith("@agdata.com", StringComparison.OrdinalIgnoreCase))
+            throw new ArgumentException("Only AGDATA employees can register.");
 
-            if (!value.EndsWith("@agdata.com", StringComparison.OrdinalIgnoreCase))
-                throw new ArgumentException("Only AGDATA employees can register.");
-
-            Value = value;
-        }
-
-        public override string ToString() => Value;
-
-        public override bool Equals(object? obj) =>
-            obj is Email email && Value.Equals(email.Value, StringComparison.OrdinalIgnoreCase);
-
-        public override int GetHashCode() => Value.GetHashCode(StringComparison.OrdinalIgnoreCase);
+        Value = value;
     }
+
+    public override string ToString() => Value;
+
+    public override bool Equals(object? obj) =>
+        obj is Email email && Value.Equals(email.Value, StringComparison.OrdinalIgnoreCase);
+
+    public override int GetHashCode() => Value.GetHashCode(StringComparison.OrdinalIgnoreCase);
 }

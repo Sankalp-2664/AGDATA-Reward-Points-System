@@ -4,11 +4,10 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Domain.Enums
+namespace Domain.Enums;
+
+public enum TransactionType
 {
-    public enum TransactionType
-    {
-        Credit = 1,
-        Debit = 2
-    }
+    Credit = 1,
+    Debit = 2
 }

@@ -2,27 +2,26 @@
 
 #nullable disable
 
-namespace Infrastructure.Migrations
+namespace Infrastructure.Migrations;
+
+/// <inheritdoc />
+public partial class ValueObjectAdded : Migration
 {
     /// <inheritdoc />
-    public partial class ValueObjectAdded : Migration
+    protected override void Up(MigrationBuilder migrationBuilder)
     {
-        /// <inheritdoc />
-        protected override void Up(MigrationBuilder migrationBuilder)
-        {
-            migrationBuilder.DropIndex(
-                name: "IX_ProductInformations_SKU",
-                table: "ProductInformations");
-        }
+        migrationBuilder.DropIndex(
+            name: "IX_ProductInformations_SKU",
+            table: "ProductInformations");
+    }
 
-        /// <inheritdoc />
-        protected override void Down(MigrationBuilder migrationBuilder)
-        {
-            migrationBuilder.CreateIndex(
-                name: "IX_ProductInformations_SKU",
-                table: "ProductInformations",
-                column: "SKU",
-                unique: true);
-        }
+    /// <inheritdoc />
+    protected override void Down(MigrationBuilder migrationBuilder)
+    {
+        migrationBuilder.CreateIndex(
+            name: "IX_ProductInformations_SKU",
+            table: "ProductInformations",
+            column: "SKU",
+            unique: true);
     }
 }

@@ -1,28 +1,34 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Design;
+using Microsoft.Extensions.Configuration;
 
-namespace Infrastructure.Persistence
+namespace Infrastructure.Persistence;
+
+public class RewardDbContextFactory : IDesignTimeDbContextFactory<RewardDbContext>
 {
-    /// <summary>
-    /// Design-time factory used by EF tools (Add-Migration / Update-Database) when the startup project isn't available.
-    /// Adjust the connection string if needed.
-    /// </summary>
-    public class RewardDbContextFactory : IDesignTimeDbContextFactory<RewardDbContext>
+    public RewardDbContext CreateDbContext(string[] args)
     {
-        public RewardDbContext CreateDbContext(string[] args)
+        var environment = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") ?? "Development";
+
+        var basePath = Path.Combine(Directory.GetCurrentDirectory(), "../Api.Server");
+
+        var configuration = new ConfigurationBuilder()
+            .SetBasePath(basePath)
+            .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
+            .AddJsonFile($"appsettings.{environment}.json", optional: true)
+            .AddEnvironmentVariables()
+            .Build();
+
+        var connectionString = configuration.GetConnectionString("RewardDb");
+        if (string.IsNullOrWhiteSpace(connectionString))
+            throw new InvalidOperationException("Connection string 'RewardDb' not found in configuration.");
+
+        var optionsBuilder = new DbContextOptionsBuilder<RewardDbContext>();
+        optionsBuilder.UseSqlServer(connectionString, sql =>
         {
-            var optionsBuilder = new DbContextOptionsBuilder<RewardDbContext>();
+            sql.MigrationsAssembly(typeof(RewardDbContext).Assembly.FullName);
+        });
 
-            // Change this connection string if your SQL Server instance differs.
-            var conn = "Server=SANKALP-26\\SQLEXPRESS;Database=AgdataRewardDB;Trusted_Connection=True;TrustServerCertificate=True;";
-
-            optionsBuilder.UseSqlServer(conn, sql =>
-            {
-                // optional: specify migrations assembly explicitly if needed
-                sql.MigrationsAssembly(typeof(RewardDbContext).Assembly.FullName);
-            });
-
-            return new RewardDbContext(optionsBuilder.Options);
-        }
+        return new RewardDbContext(optionsBuilder.Options);
     }
 }

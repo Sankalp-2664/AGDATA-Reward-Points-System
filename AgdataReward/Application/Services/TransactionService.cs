@@ -1,23 +1,17 @@
 ﻿using Application.Interfaces;
 using Domain.Entities.Reward;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace Application.Services
+namespace Application.Services;
+
+public class TransactionService : ITransactionService
 {
-    public class TransactionService : ITransactionService
+    private readonly IRewardTransactionRepository _transactionRepo;
+
+    public TransactionService(IRewardTransactionRepository transactionRepo)
     {
-        private readonly IRewardTransactionRepository _transactionRepo;
-
-        public TransactionService(IRewardTransactionRepository transactionRepo)
-        {
-            _transactionRepo = transactionRepo;
-        }
-
-        public async Task<IEnumerable<RewardTransaction>> GetUserTransactionsAsync(Guid userId)
-            => await _transactionRepo.GetByUserIdAsync(userId);
+        _transactionRepo = transactionRepo;
     }
+
+    public async Task<IEnumerable<RewardTransaction>> GetUserTransactionsAsync(Guid userId)
+        => await _transactionRepo.GetByUserIdAsync(userId);
 }

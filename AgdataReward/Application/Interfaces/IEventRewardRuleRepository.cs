@@ -1,16 +1,10 @@
 ﻿using Domain.Entities.Event;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace Application.Interfaces
+namespace Application.Interfaces;
+
+public interface IEventRewardRuleRepository
 {
-    public interface IEventRewardRuleRepository
-    {
-        Task<IEnumerable<EventRewardRule>> GetByEventIdAsync(Guid eventId);
-        Task AddAsync(EventRewardRule rule);
-        Task UpdateAsync(EventRewardRule rule);
-    }
+    Task<IEnumerable<EventRewardRule>> GetByEventIdAsync(Guid eventId);
+    Task AddAsync(EventRewardRule rule);
+    Task UpdateAsync(EventRewardRule rule);
 }

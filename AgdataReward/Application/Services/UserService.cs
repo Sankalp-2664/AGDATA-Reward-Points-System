@@ -48,7 +48,7 @@ public class UserService : IUserService
         await _userRepository.AddAsync(profile);
 
         var account = new UserAccount(profile.Id);
-        await _accountRepository.UpdateAsync(account);
+        await _accountRepository.AddAsync(account);
 
         return profile;
     }
@@ -63,4 +63,12 @@ public class UserService : IUserService
     {
         return await _accountRepository.GetByUserIdAsync(userId);
     }
+    public async Task<UserProfile?> GetUserByIdAsync(Guid userId)
+    {
+        if (userId == Guid.Empty)
+            throw new ArgumentException("User ID cannot be empty.", nameof(userId));
+
+        return await _userRepository.GetByIdAsync(userId);
+    }
+
 }

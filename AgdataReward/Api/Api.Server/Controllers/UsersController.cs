@@ -1,5 +1,6 @@
+using Api.Server.DTOs.User;
 using Application.Interfaces;
-using Domain.Entities.User;
+using Domain.Enums;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Api.Server.Controllers;
@@ -8,47 +9,95 @@ namespace Api.Server.Controllers;
 [Route("api/[controller]")]
 public class UsersController : ControllerBase
 {
-    private readonly IUserRepository _userRepository;
+    private readonly IUserService _userService;
 
-    public UsersController(IUserRepository userRepository)
+    public UsersController(IUserService userService)
     {
-        _userRepository = userRepository;
-    }
-
-    // GET: api/users
-    [HttpGet]
-    public async Task<IActionResult> GetAll()
-    {
-        var users = await _userRepository.ListAsync();
-        return Ok(users);
+        _userService = userService;
     }
 
     // GET: api/users/{id}
     [HttpGet("{id:guid}")]
-    public async Task<IActionResult> GetById(Guid id)
+    public async Task<ActionResult<UserProfileDto>> GetUserById(Guid id)
     {
-        var user = await _userRepository.GetByIdAsync(id);
+        var user = await _userService.GetUserByIdAsync(id);
         if (user == null) return NotFound();
-        return Ok(user);
+
+        var dto = new UserProfileDto
+        {
+            Id = user.Id,
+            EmployeeId = user.EmployeeId.Value,
+            FirstName = user.FirstName,
+            LastName = user.LastName,
+            Email = user.Email.Value,
+            Role = user.Role.ToString(),
+            Account = user.Account != null
+                ? new UserAccountDto
+                {
+                    Id = user.Account.Id,
+                    RewardBalance = user.Account.RewardBalance,
+                    Status = user.Account.Status.ToString()
+                }
+                : null
+        };
+
+        return Ok(dto);
     }
 
     // POST: api/users
     [HttpPost]
-    public async Task<IActionResult> Create(UserProfile user)
+    public async Task<ActionResult<UserProfileDto>> CreateUser(UserProfileCreateDto createDto)
     {
-        await _userRepository.AddAsync(user);
-        return CreatedAtAction(nameof(GetById), new { id = user.Id }, user);
+        try
+        {
+            var user = await _userService.RegisterUserAsync(
+                createDto.EmployeeId,
+                createDto.Email,
+                createDto.FirstName,
+                createDto.LastName,
+                Enum.Parse<UserRole>(createDto.Role, true)
+            );
+
+            var dto = new UserProfileDto
+            {
+                Id = user.Id,
+                EmployeeId = user.EmployeeId.Value,
+                FirstName = user.FirstName,
+                LastName = user.LastName,
+                Email = user.Email.Value,
+                Role = user.Role.ToString(),
+                Account = user.Account != null
+                    ? new UserAccountDto
+                    {
+                        Id = user.Account.Id,
+                        RewardBalance = user.Account.RewardBalance,
+                        Status = user.Account.Status.ToString()
+                    }
+                    : null
+            };
+
+            return CreatedAtAction(nameof(GetUserById), new { id = user.Id }, dto);
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(new { Message = ex.Message });
+        }
     }
 
-    // PUT: api/users/{id}
-    [HttpPut("{id:guid}")]
-    public async Task<IActionResult> Update(Guid id, UserProfile user)
+    // GET: api/users/{id}/account
+    [HttpGet("{id:guid}/account")]
+    public async Task<ActionResult<UserAccountDto>> GetUserAccount(Guid id)
     {
-        if (id != user.Id) return BadRequest("Id mismatch");
+        var account = await _userService.GetUserAccountAsync(id);
+        if (account == null) return NotFound();
 
-        // simplest in-memory: remove and re-add
-        await _userRepository.AddAsync(user);
-        return Ok(user);
+        var dto = new UserAccountDto
+        {
+            Id = account.Id,
+            RewardBalance = account.RewardBalance,
+            Status = account.Status.ToString()
+        };
+
+        return Ok(dto);
     }
 }
-

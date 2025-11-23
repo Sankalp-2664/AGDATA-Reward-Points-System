@@ -40,4 +40,15 @@ public class ProductRepository : IProductRepository
             .Include(p => p.RewardPoints)
             .ToListAsync();
     }
+
+    public async Task DeleteAsync(Guid id)
+    {
+        var entity = await _context.ProductInformations.FindAsync(id);
+        if (entity != null)
+        {
+            _context.ProductInformations.Remove(entity);
+            await _context.SaveChangesAsync();
+        }
+    }
+
 }

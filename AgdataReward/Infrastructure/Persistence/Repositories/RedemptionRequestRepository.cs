@@ -19,6 +19,7 @@ namespace Infrastructure.Persistence.Repositories
         {
             return await _context.RedemptionRequests
                 .FirstOrDefaultAsync(r => r.Id == id);
+
         }
 
         public async Task UpdateAsync(RedemptionRequest request)

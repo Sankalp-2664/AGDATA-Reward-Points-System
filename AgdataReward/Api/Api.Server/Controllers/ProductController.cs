@@ -1,5 +1,7 @@
-﻿using Api.Server.DTOs;
+﻿using Api.Server.DTOs.Product;
 using Application.Interfaces;
+using AutoMapper;
+using Infrastructure.Persistence.Repositories;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Api.Server.Controllers;
@@ -9,37 +11,90 @@ namespace Api.Server.Controllers;
 public class ProductController : ControllerBase
 {
     private readonly IProductService _productService;
-    private readonly IInventoryService _inventoryService;
+    private readonly IMapper _mapper;
+    private readonly IRewardPointsRepository _rewardPointsRepo;
 
-    public ProductController(IProductService productService, IInventoryService inventoryService)
+    public ProductController(IProductService productService, IMapper mapper, IRewardPointsRepository rewardPointsRepo)
     {
         _productService = productService;
-        _inventoryService = inventoryService;
+        _mapper = mapper;
+        _rewardPointsRepo = rewardPointsRepo;
     }
 
-    // POST: api/product
+    // CREATE PRODUCT
     [HttpPost]
-    public async Task<IActionResult> CreateProduct([FromBody] ProductDto dto)
+    public async Task<IActionResult> Create([FromBody] ProductInformationCreateDto dto)
     {
-        var product = await _productService.AddProductAsync(dto.Sku, dto.Name, dto.RewardPointsId);
+        if (!ModelState.IsValid) return BadRequest(ModelState);
 
-        var resultDto = new ProductDto
+        try
         {
-            ProductId = product.Id,
-            Sku = product.SKU.Value,  
-            Name = product.Name,
-            RewardPointsId = product.RewardPointsId,
-            Stock = 0 
-        };
+            var product = await _productService.AddProductAsync(dto.SKU, dto.Name, dto.RewardPointsId);
 
-        return Ok(resultDto);
+            // reload for rewardPointsValue
+            var fullProduct = await _productService.GetByIdAsync(product.Id);
+
+            var result = _mapper.Map<ProductInformationDto>(fullProduct);
+            var rp = await _rewardPointsRepo.GetByIdAsync(result.RewardPointsId);
+            result.RewardPointsValue = rp?.PointsValue ?? 0;
+            return CreatedAtAction(nameof(GetById), new { id = result.Id }, result);
+        }
+        catch (InvalidOperationException ex)
+        {
+            return Conflict(new { message = ex.Message });
+        }
+        catch (ArgumentException ex)
+        {
+            return BadRequest(new { message = ex.Message });
+        }
     }
 
-    // PUT: api/product/{productId}/stock
-    [HttpPut("{productId:guid}/stock")]
-    public async Task<IActionResult> UpdateStock(Guid productId, [FromQuery] int change)
+    // GET ALL PRODUCTS
+    [HttpGet]
+    [HttpGet]
+    public async Task<IActionResult> GetAll()
     {
-        await _inventoryService.UpdateStockAsync(productId, change);
-        return Ok();
+        var products = await _productService.GetCatalogAsync();
+        var result = new List<ProductInformationDto>();
+
+        foreach (var product in products)
+        {
+            var dto = _mapper.Map<ProductInformationDto>(product);
+
+            var rp = await _rewardPointsRepo.GetByIdAsync(dto.RewardPointsId);
+            dto.RewardPointsValue = rp?.PointsValue ?? 0;
+
+            result.Add(dto);
+        }
+
+        return Ok(result);
     }
+
+    // GET PRODUCT BY ID
+    [HttpGet("{id:guid}")]
+    public async Task<IActionResult> GetById(Guid id)
+    {
+        var product = await _productService.GetByIdAsync(id);
+        if (product == null) return NotFound();
+
+        var result = _mapper.Map<ProductInformationDto>(product);
+
+        var rp = await _rewardPointsRepo.GetByIdAsync(result.RewardPointsId);
+        result.RewardPointsValue = rp?.PointsValue ?? 0;
+
+        return Ok(result);
+    }
+
+
+    [HttpDelete("{id:guid}")]
+    public async Task<IActionResult> Delete(Guid id)
+    {
+        var deleted = await _productService.DeleteProductAsync(id);
+
+        if (!deleted)
+            return NotFound(new { message = "Product not found." });
+
+        return Ok(new { message = "Product deleted successfully." });
+    }
+
 }

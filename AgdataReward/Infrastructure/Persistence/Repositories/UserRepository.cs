@@ -2,7 +2,6 @@
 using Domain.Entities.User;
 using Domain.ValueObjects;
 using Microsoft.EntityFrameworkCore;
-using System;
 
 namespace Infrastructure.Persistence.Repositories
 {
@@ -26,14 +25,14 @@ namespace Infrastructure.Persistence.Repositories
         {
             return await _context.UserProfiles
                 .Include(u => u.Account)
-                .FirstOrDefaultAsync(u => u.Email.Value.ToLower() == email.Value.ToLower());
+                .FirstOrDefaultAsync(u => u.Email == email);  
         }
 
         public async Task<UserProfile?> GetByEmployeeIdAsync(EmployeeId employeeId)
         {
             return await _context.UserProfiles
                 .Include(u => u.Account)
-                .FirstOrDefaultAsync(u => u.EmployeeId.Value.ToLower() == employeeId.Value.ToLower());
+                .FirstOrDefaultAsync(u => u.EmployeeId == employeeId);  
         }
 
         public async Task<UserProfile?> FindByEmailOrEmployeeIdAsync(Email email, EmployeeId employeeId)
@@ -41,8 +40,8 @@ namespace Infrastructure.Persistence.Repositories
             return await _context.UserProfiles
                 .Include(u => u.Account)
                 .FirstOrDefaultAsync(u =>
-                    u.Email.Value.ToLower() == email.Value.ToLower() ||
-                    u.EmployeeId.Value.ToLower() == employeeId.Value.ToLower());
+                    u.Email == email ||                 
+                    u.EmployeeId == employeeId);           
         }
 
         public async Task<IEnumerable<UserProfile>> ListAsync()

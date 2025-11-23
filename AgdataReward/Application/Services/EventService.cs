@@ -101,4 +101,10 @@ public class EventService : IEventService
         account.AddPoints(rewardPoints.PointsValue, transaction);
         await _accountRepo.UpdateAsync(account);
     }
+
+    public async Task<EventDefinition> UpdateEventAsync(EventDefinition eventDefinition)
+    {
+        await _definitionRepo.UpdateAsync(eventDefinition);
+        return eventDefinition;
+    }
 }

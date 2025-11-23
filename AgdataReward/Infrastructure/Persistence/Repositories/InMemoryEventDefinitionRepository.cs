@@ -18,5 +18,15 @@ public class InMemoryEventDefinitionRepository : IEventDefinitionRepository
 
     public Task<IEnumerable<EventDefinition>> ListAsync()
         => Task.FromResult<IEnumerable<EventDefinition>>(_definitions);
+
+    public Task UpdateAsync(EventDefinition definition)
+        {
+        var index = _definitions.FindIndex(d => d.Id == definition.Id);
+        if (index != -1)
+        {
+            _definitions[index] = definition;
+        }
+        return Task.CompletedTask;
+    }
 }
 

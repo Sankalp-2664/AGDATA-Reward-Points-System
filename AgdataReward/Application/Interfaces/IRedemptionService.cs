@@ -8,4 +8,5 @@ public interface IRedemptionService
     Task ApproveRedemptionAsync(Guid redemptionId);
     Task RejectRedemptionAsync(Guid redemptionId);
     Task CompleteRedemptionAsync(Guid redemptionId);
+    Task<RedemptionRecord?> GetRedemptionByIdAsync(Guid redemptionId);
 }

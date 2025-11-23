@@ -9,4 +9,5 @@ public interface IProductRepository
     Task<ProductInformation?> GetBySkuAsync(SKU sku);
     Task AddAsync(ProductInformation product);
     Task<IEnumerable<ProductInformation>> ListAsync();
+    Task DeleteAsync(Guid id);
 }

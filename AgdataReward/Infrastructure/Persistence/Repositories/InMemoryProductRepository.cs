@@ -26,4 +26,14 @@ public class InMemoryProductRepository : IProductRepository
 
     public Task<IEnumerable<ProductInformation>> ListAsync()
         => Task.FromResult<IEnumerable<ProductInformation>>(_products);
+
+    public Task DeleteAsync(Guid id)
+    {
+        var item = _products.FirstOrDefault(p => p.Id == id);
+        if (item != null)
+            _products.Remove(item);
+
+        return Task.CompletedTask;
+    }
+
 }

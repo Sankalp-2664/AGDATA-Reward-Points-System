@@ -19,4 +19,5 @@ public interface IUserService
     /// Gets the user's reward account by user ID.
     /// </summary>
     Task<UserAccount?> GetUserAccountAsync(Guid userId);
+    Task<UserProfile?> GetUserByIdAsync(Guid userId);
 }

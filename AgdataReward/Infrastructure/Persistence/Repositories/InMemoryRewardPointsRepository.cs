@@ -18,4 +18,10 @@ public class InMemoryRewardPointsRepository : IRewardPointsRepository
         _rewardPoints[rewardPoints.Id] = rewardPoints;
         return Task.CompletedTask;
     }
+
+    public async Task<IEnumerable<RewardPoints>> ListAsync()
+    {
+        return await Task.FromResult(_rewardPoints.Values.ToList());
+    }
+
 }

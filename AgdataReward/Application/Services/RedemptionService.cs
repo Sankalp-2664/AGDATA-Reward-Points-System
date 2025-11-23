@@ -125,4 +125,9 @@ public class RedemptionService : IRedemptionService
         process.MarkCompleted();
         await _processRepo.UpdateAsync(process);
     }
+
+    public async Task<RedemptionRecord?> GetRedemptionByIdAsync(Guid redemptionId)
+    {
+        return await _recordRepo.GetByIdAsync(redemptionId);
+    }
 }

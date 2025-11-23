@@ -37,4 +37,10 @@ public class EventDefinitionRepository : IEventDefinitionRepository
             .Include(e => e.Instances)
             .ToListAsync();
     }
+
+    public async Task UpdateAsync(EventDefinition entity)
+    {
+        _context.EventDefinitions.Update(entity);  
+        await _context.SaveChangesAsync();
+    }
 }

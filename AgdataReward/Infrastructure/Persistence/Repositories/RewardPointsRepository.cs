@@ -25,5 +25,11 @@ namespace Infrastructure.Persistence.Repositories
             await _context.RewardPoints.AddAsync(rewardPoints);
             await _context.SaveChangesAsync();
         }
+
+        public async Task<IEnumerable<RewardPoints>> ListAsync()
+        {
+            return await _context.RewardPoints.ToListAsync();
+        }
+
     }
 }

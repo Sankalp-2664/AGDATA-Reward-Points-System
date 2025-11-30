@@ -6,6 +6,7 @@ using Domain.Entities.Reward;
 using Domain.Enums;
 using Domain.ValueObjects;
 using Infrastructure.Persistence.Repositories;
+using Infrastructure.Security;   // 👈 for PasswordHasher
 
 namespace Api.Server.Milestone1;
 
@@ -28,14 +29,38 @@ public static class Milestone1Program
         var redemptionRepo = new InMemoryRedemptionRecordRepository();
         var redemptionRequestRepo = new InMemoryRedemptionRequestRepository();
 
-        // Initialize services
-        IUserService userService = new UserService(userRepo, accountRepo);
-        IEventService eventService = new EventService(eventDefRepo, eventRuleRepo, eventInstanceRepo, accountRepo, transactionRepo, rewardPointsRepo);
-        IRedemptionService redemptionService = new RedemptionService(redemptionRepo, redemptionRequestRepo, accountRepo, productRepo, inventoryRepo, rewardPointsRepo, transactionRepo);
+        // Password hasher (same as used in real app)
+        IPasswordHasher passwordHasher = new PasswordHasher();
 
-        // 1. Register a user
-        var user = await userService.RegisterUserAsync("E123", "user@mail.com", "Sankalp", "Chakre", UserRole.User);
-        Console.WriteLine($"Registered user: {user.FirstName} ({user.Email})");
+        // Initialize services with updated constructor
+        IUserService userService = new UserService(userRepo, accountRepo, passwordHasher);
+        IEventService eventService = new EventService(
+            eventDefRepo,
+            eventRuleRepo,
+            eventInstanceRepo,
+            accountRepo,
+            transactionRepo,
+            rewardPointsRepo);
+        IRedemptionService redemptionService = new RedemptionService(
+            redemptionRepo,
+            redemptionRequestRepo,
+            accountRepo,
+            productRepo,
+            inventoryRepo,
+            rewardPointsRepo,
+            transactionRepo);
+
+        // 1. Register a user (now with password)
+        var user = await userService.RegisterUserAsync(
+            "E123",
+            "user@mail.com",
+            "Sankalp",
+            "Chakre",
+            UserRole.User,
+            "User@123" // demo password
+        );
+
+        Console.WriteLine($"Registered user: {user.FirstName} ({user.Email.Value})");
 
         // 2. Create an event
         var eventDef = await eventService.CreateEventAsync("HACK", "Hackathon");

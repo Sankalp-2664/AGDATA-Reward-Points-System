@@ -103,6 +103,15 @@ public class RewardDbContext : DbContext
                   .IsRequired()
                   .HasDefaultValue(AccountStatus.Active);
 
+            // Credentials
+            entity.Property(a => a.PasswordHash)
+                  .IsRequired()
+                  .HasMaxLength(512);
+
+            entity.Property(a => a.PasswordSalt)
+                  .IsRequired()
+                  .HasMaxLength(256);
+
             // One-to-one FK
             entity.HasOne(a => a.User)
                   .WithOne(u => u.Account)
@@ -110,7 +119,6 @@ public class RewardDbContext : DbContext
                   .OnDelete(DeleteBehavior.Cascade);
 
             // Backing field for transactions: private readonly List<RewardTransaction> _transactions
-            // Configure one-to-many for transactions using UserAccount => RewardTransaction (FK on RewardTransaction.UserId)
             entity.HasMany(a => a.Transactions)
                   .WithOne(t => t.UserAccount)
                   .HasForeignKey(t => t.UserId)
@@ -118,7 +126,6 @@ public class RewardDbContext : DbContext
 
             entity.Metadata.FindNavigation(nameof(UserAccount.Transactions))
                   ?.SetField("_transactions");
-
         });
 
         // ====================
@@ -155,13 +162,6 @@ public class RewardDbContext : DbContext
 
             entity.Property(t => t.CreatedAt)
                   .HasDefaultValueSql("GETUTCDATE()");
-
-            // Relationship to UserAccount (UserId FK on RewardTransaction maps to UserAccount.Id)
-            //entity.Property(t => t.UserId).IsRequired();
-            //entity.HasOne(t => t.UserAccount)
-            //      .WithMany("_transactions")
-            //      .HasForeignKey(t => t.UserId)
-            //      .OnDelete(DeleteBehavior.Cascade);
 
             entity.Property(t => t.UserId).IsRequired();
 
@@ -275,7 +275,6 @@ public class RewardDbContext : DbContext
             entity.Property(pi => pi.StockQuantity).IsRequired();
             entity.Property(pi => pi.IsActive).IsRequired();
 
-            // One-to-one (or one-to-many depending on your design). We'll treat inventory entry as one-to-one per product:
             entity.HasOne(pi => pi.Product)
                   .WithMany()
                   .HasForeignKey(pi => pi.ProductId)
@@ -328,10 +327,9 @@ public class RewardDbContext : DbContext
         // ====================
         // Generic configurations / conventions
         // ====================
-        // Ensure GUIDs are required where appropriate:
         foreach (var entityType in modelBuilder.Model.GetEntityTypes())
         {
-            // Convert CLR enum properties to int by default (we've already handled many explicitly).
+            // Convert CLR enum properties to int by default.
             foreach (var prop in entityType.GetProperties().Where(p => p.ClrType.IsEnum))
             {
                 prop.SetColumnType("int");

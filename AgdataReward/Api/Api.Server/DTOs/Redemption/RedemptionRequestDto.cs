@@ -1,5 +1,4 @@
-﻿using Domain.Entities.Redemption;
-using Domain.Enums;
+﻿using Domain.Enums;
 
 namespace Api.Server.DTOs.Redemption;
 
@@ -10,16 +9,4 @@ public class RedemptionRequestDto
     public int PointsUsed { get; set; }
     public RedemptionStatus Status { get; set; }
     public DateTime CreatedAt { get; set; }
-
-    public static RedemptionRequestDto FromDomain(RedemptionRequest entity)
-    {
-        return new RedemptionRequestDto
-        {
-            Id = entity.Id,
-            RedemptionId = entity.RedemptionId,
-            PointsUsed = entity.PointsUsed,
-            Status = entity.Status,
-            CreatedAt = entity.CreatedAt
-        };
-    }
 }

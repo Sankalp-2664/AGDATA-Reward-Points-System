@@ -1,8 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace Api.Server.DTOs.User;
-
-public class UserProfileCreateDto
+public sealed class UserProfileCreateDto
 {
     [Required]
     public string EmployeeId { get; set; } = string.Empty;
@@ -17,6 +15,9 @@ public class UserProfileCreateDto
     [Required]
     public string LastName { get; set; } = string.Empty;
 
+    /// <summary>User role name (default = "User").</summary>
+    public string Role { get; set; } = "User";
+
     [Required]
-    public string Role { get; set; } = string.Empty; // Admin, User
+    public string Password { get; set; } = string.Empty;
 }

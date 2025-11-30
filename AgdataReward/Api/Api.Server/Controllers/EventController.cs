@@ -1,34 +1,55 @@
 ﻿using Api.Server.DTOs.Event;
+using Api.Server.Services;
 using Application.Interfaces;
 using AutoMapper;
 using Domain.Entities.Event;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Api.Server.Controllers;
 
+/// <summary>
+/// Manages event definitions, reward rules and winner assignments
+/// in the reward system.
+/// </summary>
 [ApiController]
 [Route("api/[controller]")]
-public class EventController : ControllerBase
+[Authorize] // all endpoints require authentication
+public class EventController(
+    IEventApiService eventApiService,
+    ILogger<EventController> logger) : ControllerBase
 {
-    private readonly IEventService _eventService;
-    private readonly IMapper _mapper;
-    private readonly ILogger<EventController> _logger;
-
-    public EventController(
-        IEventService eventService,
-        IMapper mapper,
-        ILogger<EventController> logger)
-    {
-        _eventService = eventService;
-        _mapper = mapper;
-        _logger = logger;
-    }
-
-    // ============================
-    // CREATE EVENT
-    // POST: api/event
-    // ============================
+    private readonly IEventApiService _eventApiService = eventApiService;
+    private readonly ILogger<EventController> _logger = logger;
+    /// <summary>
+    /// Creates a new event definition.
+    /// </summary>
+    /// <param name="dto">The event definition payload.</param>
+    /// <returns>The newly created event definition.</returns>
+    /// <remarks>
+    /// Sample request:
+    ///
+    ///     POST /api/event
+    ///     {
+    ///       "code": "HACK2025",
+    ///       "title": "Hackathon 2025"
+    ///     }
+    ///
+    /// </remarks>
+    /// <response code="201">Returns the newly created event definition.</response>
+    /// <response code="400">If the input payload is invalid.</response>
+    /// <response code="401">If the caller is not authenticated.</response>
+    /// <response code="403">If the caller is not an admin.</response>
+    /// <response code="409">If an event with the same code already exists.</response>
+    /// <response code="500">If an unexpected error occurs.</response>
     [HttpPost]
+    [Authorize(Roles = "Admin")]
+    [ProducesResponseType(typeof(EventDefinitionDto), StatusCodes.Status201Created)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(StatusCodes.Status409Conflict)]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
     public async Task<IActionResult> CreateEvent([FromBody] EventDefinitionCreateDto dto)
     {
         if (!ModelState.IsValid)
@@ -36,10 +57,7 @@ public class EventController : ControllerBase
 
         try
         {
-            var entity = _mapper.Map<EventDefinition>(dto);
-            var created = await _eventService.CreateEventAsync(entity.Code, entity.Title);
-
-            var resultDto = _mapper.Map<EventDefinitionDto>(created);
+            var resultDto = await _eventApiService.CreateEventAsync(dto);
             return CreatedAtAction(nameof(GetById), new { id = resultDto.Id }, resultDto);
         }
         catch (InvalidOperationException ex)
@@ -54,64 +72,74 @@ public class EventController : ControllerBase
         }
     }
 
-    // ============================
-    // GET ALL EVENTS
-    // GET: api/event
-    // ============================
+    /// <summary>
+    /// Retrieves all event definitions.
+    /// </summary>
+    /// <returns>List of event definitions.</returns>
     [HttpGet]
+    [ProducesResponseType(typeof(IEnumerable<EventDefinitionDto>), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     public async Task<IActionResult> GetAll()
     {
-        var events = await _eventService.ListEventsAsync();
-        var dtos = _mapper.Map<IEnumerable<EventDefinitionDto>>(events);
+        var dtos = await _eventApiService.GetAllAsync();
         return Ok(dtos);
     }
 
-    // ============================
-    // GET EVENT BY ID
-    // GET: api/event/{id}
-    // ============================
+    /// <summary>
+    /// Retrieves an event definition by its identifier.
+    /// </summary>
+    /// <param name="id">Event identifier.</param>
     [HttpGet("{id:guid}")]
+    [ProducesResponseType(typeof(EventDefinitionDto), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> GetById(Guid id)
     {
-        var entity = await _eventService.GetEventByIdAsync(id);
-        if (entity == null)
+        var dto = await _eventApiService.GetByIdAsync(id);
+        if (dto is null)
             return NotFound();
 
-        var dto = _mapper.Map<EventDefinitionDto>(entity);
         return Ok(dto);
     }
 
-    // ============================
-    // UPDATE EVENT
-    // PUT: api/event/{id}
-    // ============================
+    /// <summary>
+    /// Updates an existing event definition.
+    /// </summary>
     [HttpPut("{id:guid}")]
+    [Authorize(Roles = "Admin")]
+    [ProducesResponseType(typeof(EventDefinitionDto), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> Update(Guid id, [FromBody] EventDefinitionUpdateDto dto)
     {
-        if (id != dto.Id)
-            return BadRequest("Event ID mismatch.");
-
         if (!ModelState.IsValid)
             return BadRequest(ModelState);
 
-        var existing = await _eventService.GetEventByIdAsync(id);
-        if (existing == null)
-            return NotFound();
+        try
+        {
+            var updated = await _eventApiService.UpdateAsync(id, dto);
+            if (updated is null)
+                return NotFound();
 
-        // Apply updates via AutoMapper
-        _mapper.Map(dto, existing);
-         await _eventService.UpdateEventAsync(existing);
-
-        return Ok(_mapper.Map<EventDefinitionDto>(existing));
+            return Ok(updated);
+        }
+        catch (ArgumentException ex) when (ex.Message.Contains("mismatch", StringComparison.OrdinalIgnoreCase))
+        {
+            return BadRequest(new { message = ex.Message });
+        }
     }
 
-    // ============================
-    // ASSIGN WINNER
-    // POST: api/event/assign-winner
-    // ============================
     public record AssignWinnerRequest(Guid EventInstanceId, Guid UserId, int Rank);
 
     [HttpPost("assign-winner")]
+    [Authorize(Roles = "Admin")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
     public async Task<IActionResult> AssignWinner([FromBody] AssignWinnerRequest request)
     {
         if (request.EventInstanceId == Guid.Empty || request.UserId == Guid.Empty)
@@ -119,7 +147,7 @@ public class EventController : ControllerBase
 
         try
         {
-            await _eventService.AssignWinnerAsync(request.EventInstanceId, request.UserId, request.Rank);
+            await _eventApiService.AssignWinnerAsync(request.EventInstanceId, request.UserId, request.Rank);
             return Ok(new { message = "Winner assigned successfully." });
         }
         catch (ArgumentException ex)
@@ -134,13 +162,15 @@ public class EventController : ControllerBase
         }
     }
 
-    // ============================
-    // ADD REWARD RULE
-    // POST: api/event/{eventId}/reward-rule
-    // ============================
     public record AddRewardRuleRequest(Guid RewardPointsId, int Rank);
 
     [HttpPost("{eventId:guid}/reward-rule")]
+    [Authorize(Roles = "Admin")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
     public async Task<IActionResult> AddRewardRule(Guid eventId, [FromBody] AddRewardRuleRequest request)
     {
         if (eventId == Guid.Empty)
@@ -148,7 +178,7 @@ public class EventController : ControllerBase
 
         try
         {
-            await _eventService.AddRewardRuleAsync(eventId, request.Rank, request.RewardPointsId);
+            await _eventApiService.AddRewardRuleAsync(eventId, request.RewardPointsId, request.Rank);
             return Ok(new { message = "Reward rule added successfully." });
         }
         catch (Exception ex)

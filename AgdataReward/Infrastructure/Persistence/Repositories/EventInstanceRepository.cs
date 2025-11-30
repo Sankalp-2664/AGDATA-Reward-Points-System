@@ -4,21 +4,16 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Infrastructure.Persistence.Repositories;
 
-public class EventInstanceRepository : IEventInstanceRepository
+public class EventInstanceRepository(RewardDbContext context) : IEventInstanceRepository
 {
-    private readonly RewardDbContext _context;
-
-    public EventInstanceRepository(RewardDbContext context)
-    {
-        _context = context;
-    }
+    private readonly RewardDbContext _context = context;
 
     public async Task<EventInstance?> GetByIdAsync(Guid id)
     {
         return await _context.EventInstances
             .Include(i => i.Event)
-            .Include(i => i.WinnerUser)   // optional — to load the user
-            .FirstOrDefaultAsync(i => i.Id == id);
+            .Include(i => i.WinnerUser) // optional — to load the user
+            .SingleOrDefaultAsync(i => i.Id == id);
     }
 
     public async Task AddAsync(EventInstance instance)
@@ -32,7 +27,7 @@ public class EventInstanceRepository : IEventInstanceRepository
         return await _context.EventInstances
             .AsNoTracking()
             .Include(i => i.Event)
-            .Include(i => i.WinnerUser)   // optional
+            .Include(i => i.WinnerUser) // optional
             .ToListAsync();
     }
 }

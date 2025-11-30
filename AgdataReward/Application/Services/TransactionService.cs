@@ -3,21 +3,16 @@ using Domain.Entities.Reward;
 
 namespace Application.Services;
 
-public class TransactionService : ITransactionService
+public class TransactionService(
+    IRewardTransactionRepository transactionRepo,
+    IRewardPointsRepository rewardPointsRepo) : ITransactionService
 {
-    private readonly IRewardTransactionRepository _transactionRepo;
-    private readonly IRewardPointsRepository _rewardPointsRepo;
+    private readonly IRewardTransactionRepository _transactionRepo = transactionRepo;
+    private readonly IRewardPointsRepository _rewardPointsRepo = rewardPointsRepo;
 
-    public TransactionService(
-        IRewardTransactionRepository transactionRepo,
-        IRewardPointsRepository rewardPointsRepo)
+    public async Task<RewardPoints> CreateRewardPointsAsync(int pointsValue)
     {
-        _transactionRepo = transactionRepo;
-        _rewardPointsRepo = rewardPointsRepo;
-    }
-
-    public async Task<RewardPoints> CreateRewardPointsAsync(RewardPoints rewardPoints)
-    {
+        var rewardPoints = new RewardPoints(Guid.NewGuid(), pointsValue);
         await _rewardPointsRepo.AddAsync(rewardPoints);
         return rewardPoints;
     }

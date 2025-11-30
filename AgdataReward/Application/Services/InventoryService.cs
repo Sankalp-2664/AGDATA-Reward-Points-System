@@ -3,14 +3,10 @@ using Domain.Entities.Product;
 
 namespace Application.Services;
 
-public class InventoryService : IInventoryService
+public class InventoryService(
+    IProductInventoryRepository inventoryRepository) : IInventoryService
 {
-    private readonly IProductInventoryRepository _inventoryRepository;
-
-    public InventoryService(IProductInventoryRepository inventoryRepository)
-    {
-        _inventoryRepository = inventoryRepository;
-    }
+    private readonly IProductInventoryRepository _inventoryRepository = inventoryRepository;
 
     public async Task<ProductInventory?> GetInventoryAsync(Guid productId)
         => await _inventoryRepository.GetByProductIdAsync(productId);

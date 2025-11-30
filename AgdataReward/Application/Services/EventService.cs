@@ -6,30 +6,20 @@ using System.ComponentModel.DataAnnotations;
 
 namespace Application.Services;
 
-public class EventService : IEventService
+public class EventService(
+    IEventDefinitionRepository definitionRepo,
+    IEventRewardRuleRepository ruleRepo,
+    IEventInstanceRepository instanceRepo,
+    IUserAccountRepository accountRepo,
+    IRewardTransactionRepository transactionRepo,
+    IRewardPointsRepository rewardPointsRepo) : IEventService
 {
-    private readonly IEventDefinitionRepository _definitionRepo;
-    private readonly IEventRewardRuleRepository _ruleRepo;
-    private readonly IEventInstanceRepository _instanceRepo;
-    private readonly IUserAccountRepository _accountRepo;
-    private readonly IRewardTransactionRepository _transactionRepo;
-    private readonly IRewardPointsRepository _rewardPointsRepo;
-
-    public EventService(
-        IEventDefinitionRepository definitionRepo,
-        IEventRewardRuleRepository ruleRepo,
-        IEventInstanceRepository instanceRepo,
-        IUserAccountRepository accountRepo,
-        IRewardTransactionRepository transactionRepo,
-        IRewardPointsRepository rewardPointsRepo) 
-    {
-        _definitionRepo = definitionRepo;
-        _ruleRepo = ruleRepo;
-        _instanceRepo = instanceRepo;
-        _accountRepo = accountRepo;
-        _transactionRepo = transactionRepo;
-        _rewardPointsRepo = rewardPointsRepo;
-    }
+    private readonly IEventDefinitionRepository _definitionRepo = definitionRepo;
+    private readonly IEventRewardRuleRepository _ruleRepo = ruleRepo;
+    private readonly IEventInstanceRepository _instanceRepo = instanceRepo;
+    private readonly IUserAccountRepository _accountRepo = accountRepo;
+    private readonly IRewardTransactionRepository _transactionRepo = transactionRepo;
+    private readonly IRewardPointsRepository _rewardPointsRepo = rewardPointsRepo;
 
     public async Task<EventDefinition> CreateEventAsync(string code, string title)
     {

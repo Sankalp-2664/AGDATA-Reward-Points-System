@@ -2,25 +2,19 @@
 using Domain.Entities.Event;
 using Microsoft.EntityFrameworkCore;
 
-
 namespace Infrastructure.Persistence.Repositories;
 
-public class EventDefinitionRepository : IEventDefinitionRepository
+public class EventDefinitionRepository(RewardDbContext context) : IEventDefinitionRepository
 {
-    private readonly RewardDbContext _context;
-
-    public EventDefinitionRepository(RewardDbContext context)
-    {
-        _context = context;
-    }
+    private readonly RewardDbContext _context = context;
 
     public async Task<EventDefinition?> GetByIdAsync(Guid id)
     {
-        // to include related navigation properties (Instances, RewardRules)
+        // include related navigation properties
         return await _context.EventDefinitions
             .Include(e => e.Instances)
             .Include(e => e.RewardRules)
-            .FirstOrDefaultAsync(e => e.Id == id);
+            .SingleOrDefaultAsync(e => e.Id == id);
     }
 
     public async Task AddAsync(EventDefinition definition)
@@ -40,7 +34,7 @@ public class EventDefinitionRepository : IEventDefinitionRepository
 
     public async Task UpdateAsync(EventDefinition entity)
     {
-        _context.EventDefinitions.Update(entity);  
+        _context.EventDefinitions.Update(entity);
         await _context.SaveChangesAsync();
     }
 }

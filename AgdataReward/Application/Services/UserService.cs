@@ -6,22 +6,32 @@ using Domain.ValueObjects;
 
 namespace Application.Services;
 
-public class UserService : IUserService
+public class UserService(
+    IUserRepository userRepository,
+    IUserAccountRepository accountRepository,
+    IPasswordHasher passwordHasher) : IUserService
 {
-    private readonly IUserRepository _userRepository;
-    private readonly IUserAccountRepository _accountRepository;
+    private readonly IUserRepository _userRepository = userRepository;
+    private readonly IUserAccountRepository _accountRepository = accountRepository;
+    private readonly IPasswordHasher _passwordHasher = passwordHasher;
 
-    public UserService(IUserRepository userRepository, IUserAccountRepository accountRepository)
+    public async Task<UserProfile> RegisterUserAsync(
+        string employeeId,
+        string email,
+        string firstName,
+        string lastName,
+        UserRole role,
+        string password)
     {
-        _userRepository = userRepository;
-        _accountRepository = accountRepository;
-    }
+        // 1) Basic password check (you can make this stricter later)
+        if (string.IsNullOrWhiteSpace(password))
+            throw new ArgumentException("Password is required.", nameof(password));
 
-    public async Task<UserProfile> RegisterUserAsync(string employeeId, string email, string firstName, string lastName, UserRole role)
-    {
+        // 2) Convert to value objects (validation inside them)
         var employee = new EmployeeId(employeeId);
         var userEmail = new Email(email);
 
+        // 3) Check duplicates in ONE call
         var existingUser = await _userRepository.FindByEmailOrEmployeeIdAsync(userEmail, employee);
         if (existingUser != null)
         {
@@ -32,12 +42,12 @@ public class UserService : IUserService
                 throw new DuplicateUserException($"Employee ID '{employeeId}' is already registered.");
         }
 
+        // 4) Validate role
         if (!Enum.IsDefined(typeof(UserRole), role))
             throw new ArgumentException($"Invalid role: {role}", nameof(role));
 
-
+        // 5) Create aggregate root – Id is generated INSIDE the entity
         var profile = new UserProfile(
-            Guid.NewGuid(),
             employee,
             userEmail,
             firstName,
@@ -45,9 +55,23 @@ public class UserService : IUserService
             role
         );
 
-        await _userRepository.AddAsync(profile);
-
+        // 6) Create account with credentials
         var account = new UserAccount(profile.Id);
+
+        var result = _passwordHasher.Hash(password);
+        var hash = result.Hash;
+        var salt = result.Salt;
+
+        account.SetCredentials(hash, salt);
+
+        // 7) Attach to aggregate
+        profile.AttachAccount(account);
+
+        // 8) Persist profile + account
+        // Depending on your repo implementations, you can either:
+        // a) Save via profile only (if cascade is configured), or
+        // b) Save both (current pattern).
+        await _userRepository.AddAsync(profile);
         await _accountRepository.AddAsync(account);
 
         return profile;
@@ -63,6 +87,7 @@ public class UserService : IUserService
     {
         return await _accountRepository.GetByUserIdAsync(userId);
     }
+
     public async Task<UserProfile?> GetUserByIdAsync(Guid userId)
     {
         if (userId == Guid.Empty)
@@ -70,5 +95,4 @@ public class UserService : IUserService
 
         return await _userRepository.GetByIdAsync(userId);
     }
-
 }

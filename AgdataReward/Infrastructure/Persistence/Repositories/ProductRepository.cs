@@ -5,27 +5,22 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Infrastructure.Persistence.Repositories;
 
-public class ProductRepository : IProductRepository
+public class ProductRepository(RewardDbContext context) : IProductRepository
 {
-    private readonly RewardDbContext _context;
-
-    public ProductRepository(RewardDbContext context)
-    {
-        _context = context;
-    }
+    private readonly RewardDbContext _context = context;
 
     public async Task<ProductInformation?> GetByIdAsync(Guid id)
     {
         return await _context.ProductInformations
             .Include(p => p.RewardPoints)
-            .FirstOrDefaultAsync(p => p.Id == id);
+            .SingleOrDefaultAsync(p => p.Id == id);
     }
 
     public async Task<ProductInformation?> GetBySkuAsync(SKU sku)
     {
         return await _context.ProductInformations
             .Include(p => p.RewardPoints)
-            .FirstOrDefaultAsync(p => p.SKU == sku);
+            .SingleOrDefaultAsync(p => p.SKU == sku);
     }
 
     public async Task AddAsync(ProductInformation product)
@@ -50,5 +45,4 @@ public class ProductRepository : IProductRepository
             await _context.SaveChangesAsync();
         }
     }
-
 }

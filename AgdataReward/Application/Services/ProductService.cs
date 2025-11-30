@@ -4,18 +4,14 @@ using Domain.ValueObjects;
 
 namespace Application.Services;
 
-public class ProductService : IProductService
+public class ProductService(
+    IProductRepository productRepository,
+    IRewardPointsRepository rewardPointsRepository,
+    IProductInventoryRepository productInventoryRepository) : IProductService
 {
-    private readonly IProductRepository _productRepository;
-    private readonly IRewardPointsRepository _rewardPointsRepository;
-    private readonly IProductInventoryRepository _productInventoryRepository;
-
-    public ProductService(IProductRepository productRepository, IRewardPointsRepository rewardPointsRepository, IProductInventoryRepository productInventoryRepository)
-    {
-        _productRepository = productRepository;
-        _rewardPointsRepository = rewardPointsRepository;
-        _productInventoryRepository = productInventoryRepository;
-    }
+    private readonly IProductRepository _productRepository = productRepository;
+    private readonly IRewardPointsRepository _rewardPointsRepository = rewardPointsRepository;
+    private readonly IProductInventoryRepository _productInventoryRepository = productInventoryRepository;
 
     public async Task<ProductInformation> AddProductAsync(string skuString, string name, Guid rewardPointsId)
     {

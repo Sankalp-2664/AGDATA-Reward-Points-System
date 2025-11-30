@@ -3,33 +3,26 @@ using Domain.Entities.Reward;
 using Microsoft.EntityFrameworkCore;
 using System;
 
-namespace Infrastructure.Persistence.Repositories
+namespace Infrastructure.Persistence.Repositories;
+
+public class RewardPointsRepository(RewardDbContext context) : IRewardPointsRepository
 {
-    public class RewardPointsRepository : IRewardPointsRepository
+    private readonly RewardDbContext _context = context;
+
+    public async Task<RewardPoints?> GetByIdAsync(Guid id)
     {
-        private readonly RewardDbContext _context;
+        return await _context.RewardPoints
+            .SingleOrDefaultAsync(rp => rp.Id == id);
+    }
 
-        public RewardPointsRepository(RewardDbContext context)
-        {
-            _context = context;
-        }
+    public async Task AddAsync(RewardPoints rewardPoints)
+    {
+        await _context.RewardPoints.AddAsync(rewardPoints);
+        await _context.SaveChangesAsync();
+    }
 
-        public async Task<RewardPoints?> GetByIdAsync(Guid id)
-        {
-            return await _context.RewardPoints
-                .FirstOrDefaultAsync(rp => rp.Id == id);
-        }
-
-        public async Task AddAsync(RewardPoints rewardPoints)
-        {
-            await _context.RewardPoints.AddAsync(rewardPoints);
-            await _context.SaveChangesAsync();
-        }
-
-        public async Task<IEnumerable<RewardPoints>> ListAsync()
-        {
-            return await _context.RewardPoints.ToListAsync();
-        }
-
+    public async Task<IEnumerable<RewardPoints>> ListAsync()
+    {
+        return await _context.RewardPoints.ToListAsync();
     }
 }

@@ -4,20 +4,15 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Infrastructure.Persistence.Repositories;
 
-public class ProductInventoryRepository : IProductInventoryRepository
+public class ProductInventoryRepository(RewardDbContext context) : IProductInventoryRepository
 {
-    private readonly RewardDbContext _context;
-
-    public ProductInventoryRepository(RewardDbContext context)
-    {
-        _context = context;
-    }
+    private readonly RewardDbContext _context = context;
 
     public async Task<ProductInventory?> GetByProductIdAsync(Guid productId)
     {
         return await _context.ProductInventories
             .Include(pi => pi.Product)
-            .FirstOrDefaultAsync(pi => pi.ProductId == productId);
+            .SingleOrDefaultAsync(pi => pi.ProductId == productId);
     }
 
     public async Task AddAsync(ProductInventory inventory)

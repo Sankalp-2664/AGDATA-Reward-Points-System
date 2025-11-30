@@ -6,33 +6,22 @@ using Domain.Exceptions;
 
 namespace Application.Services;
 
-public class RedemptionService : IRedemptionService
+public class RedemptionService(
+    IRedemptionRecordRepository recordRepo,
+    IRedemptionRequestRepository processRepo,
+    IUserAccountRepository accountRepo,
+    IProductRepository productRepo,
+    IProductInventoryRepository inventoryRepo,
+    IRewardPointsRepository rewardPointsRepo,
+    IRewardTransactionRepository transactionRepo) : IRedemptionService
 {
-    private readonly IRedemptionRecordRepository _recordRepo;
-    private readonly IRedemptionRequestRepository _processRepo;
-    private readonly IUserAccountRepository _accountRepo;
-    private readonly IProductRepository _productRepo;
-    private readonly IProductInventoryRepository _inventoryRepo;
-    private readonly IRewardPointsRepository _rewardPointsRepo;
-    private readonly IRewardTransactionRepository _transactionRepo;
-
-    public RedemptionService(
-        IRedemptionRecordRepository recordRepo,
-        IRedemptionRequestRepository processRepo,
-        IUserAccountRepository accountRepo,
-        IProductRepository productRepo,
-        IProductInventoryRepository inventoryRepo,
-        IRewardPointsRepository rewardPointsRepo,
-        IRewardTransactionRepository transactionRepo)
-    {
-        _recordRepo = recordRepo;
-        _processRepo = processRepo;
-        _accountRepo = accountRepo;
-        _productRepo = productRepo;
-        _inventoryRepo = inventoryRepo;
-        _rewardPointsRepo = rewardPointsRepo;
-        _transactionRepo = transactionRepo;
-    }
+    private readonly IRedemptionRecordRepository _recordRepo = recordRepo;
+    private readonly IRedemptionRequestRepository _processRepo = processRepo;
+    private readonly IUserAccountRepository _accountRepo = accountRepo;
+    private readonly IProductRepository _productRepo = productRepo;
+    private readonly IProductInventoryRepository _inventoryRepo = inventoryRepo;
+    private readonly IRewardPointsRepository _rewardPointsRepo = rewardPointsRepo;
+    private readonly IRewardTransactionRepository _transactionRepo = transactionRepo;
     
     public async Task<RedemptionRecord> RequestRedemptionAsync(Guid userId, Guid productId)
     { 

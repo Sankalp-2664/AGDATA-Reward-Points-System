@@ -3,64 +3,85 @@ using Domain.Entities.User;
 using Domain.ValueObjects;
 using Microsoft.EntityFrameworkCore;
 
-namespace Infrastructure.Persistence.Repositories
+namespace Infrastructure.Persistence.Repositories;
+
+public class UserRepository(RewardDbContext context) : IUserRepository
 {
-    public class UserRepository : IUserRepository
+    private readonly RewardDbContext _context = context;
+
+    public async Task<UserProfile?> GetByIdAsync(
+        Guid id,
+        CancellationToken cancellationToken = default)
     {
-        private readonly RewardDbContext _context;
+        return await _context.UserProfiles
+            .Include(u => u.Account)
+            .SingleOrDefaultAsync(u => u.Id == id, cancellationToken);
+    }
 
-        public UserRepository(RewardDbContext context)
-        {
-            _context = context;
-        }
+    public async Task<UserProfile?> GetByEmailAsync(
+        Email email,
+        CancellationToken cancellationToken = default)
+    {
+        return await _context.UserProfiles
+            .Include(u => u.Account)
+            .SingleOrDefaultAsync(u => u.Email == email, cancellationToken);
+    }
 
-        public async Task<UserProfile?> GetByIdAsync(Guid id)
-        {
-            return await _context.UserProfiles
-                .Include(u => u.Account)
-                .FirstOrDefaultAsync(u => u.Id == id);
-        }
+    // For login convenience
+    public async Task<UserProfile?> GetByEmailAsync(
+        string email,
+        CancellationToken cancellationToken = default)
+    {
+        var emailVo = new Email(email);
 
-        public async Task<UserProfile?> GetByEmailAsync(Email email)
-        {
-            return await _context.UserProfiles
-                .Include(u => u.Account)
-                .FirstOrDefaultAsync(u => u.Email == email);  
-        }
+        return await _context.UserProfiles
+            .Include(u => u.Account)
+            .SingleOrDefaultAsync(u => u.Email == emailVo, cancellationToken);
+    }
 
-        public async Task<UserProfile?> GetByEmployeeIdAsync(EmployeeId employeeId)
-        {
-            return await _context.UserProfiles
-                .Include(u => u.Account)
-                .FirstOrDefaultAsync(u => u.EmployeeId == employeeId);  
-        }
+    public async Task<UserProfile?> GetByEmployeeIdAsync(
+        EmployeeId employeeId,
+        CancellationToken cancellationToken = default)
+    {
+        return await _context.UserProfiles
+            .Include(u => u.Account)
+            .SingleOrDefaultAsync(u => u.EmployeeId == employeeId, cancellationToken);
+    }
 
-        public async Task<UserProfile?> FindByEmailOrEmployeeIdAsync(Email email, EmployeeId employeeId)
-        {
-            return await _context.UserProfiles
-                .Include(u => u.Account)
-                .FirstOrDefaultAsync(u =>
-                    u.Email == email ||                 
-                    u.EmployeeId == employeeId);           
-        }
+    public async Task<UserProfile?> FindByEmailOrEmployeeIdAsync(
+        Email email,
+        EmployeeId employeeId,
+        CancellationToken cancellationToken = default)
+    {
+        // This one stays FirstOrDefault because BOTH fields may exist separately
+        return await _context.UserProfiles
+            .Include(u => u.Account)
+            .FirstOrDefaultAsync(
+                u => u.Email == email || u.EmployeeId == employeeId,
+                cancellationToken);
+    }
 
-        public async Task<IEnumerable<UserProfile>> ListAsync()
-        {
-            return await _context.UserProfiles
-                .Include(u => u.Account)
-                .ToListAsync();
-        }
+    public async Task<IEnumerable<UserProfile>> ListAsync(
+        CancellationToken cancellationToken = default)
+    {
+        return await _context.UserProfiles
+            .Include(u => u.Account)
+            .ToListAsync(cancellationToken);
+    }
 
-        public async Task AddAsync(UserProfile user)
-        {
-            await _context.UserProfiles.AddAsync(user);
-            await _context.SaveChangesAsync();
-        }
+    public async Task AddAsync(
+        UserProfile user,
+        CancellationToken cancellationToken = default)
+    {
+        await _context.UserProfiles.AddAsync(user, cancellationToken);
+        await _context.SaveChangesAsync(cancellationToken);
+    }
 
-        public async Task UpdateAsync(UserProfile user)
-        {
-            _context.UserProfiles.Update(user);
-            await _context.SaveChangesAsync();
-        }
+    public async Task UpdateAsync(
+        UserProfile user,
+        CancellationToken cancellationToken = default)
+    {
+        _context.UserProfiles.Update(user);
+        await _context.SaveChangesAsync(cancellationToken);
     }
 }

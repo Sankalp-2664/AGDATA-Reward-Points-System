@@ -15,8 +15,13 @@ public class UserAccount
     public AccountStatus Status { get; private set; } // Account status (Active, Inactive)
     public virtual UserProfile? User { get; private set; } //// For navigation between UserProfile and UserAccount
 
+    // Credentials (for authentication)
+    public string PasswordHash { get; private set; } = string.Empty;
+    public string PasswordSalt { get; private set; } = string.Empty;
+
     private readonly List<RewardTransaction> _transactions = new(); // Backing field for transactions
     public IReadOnlyCollection<RewardTransaction> Transactions => _transactions.AsReadOnly(); // Expose as read-only
+
     protected UserAccount() { } // For ORM
 
     public UserAccount(Guid userId)
@@ -27,6 +32,18 @@ public class UserAccount
         UserId = userId;
         RewardBalance = 0;
         Status = AccountStatus.Active;
+    }
+
+    // Set credentials (used when registering or resetting password)
+    public void SetCredentials(string passwordHash, string passwordSalt)
+    {
+        if (string.IsNullOrWhiteSpace(passwordHash))
+            throw new ArgumentException("Password hash is required.", nameof(passwordHash));
+        if (string.IsNullOrWhiteSpace(passwordSalt))
+            throw new ArgumentException("Password salt is required.", nameof(passwordSalt));
+
+        PasswordHash = passwordHash;
+        PasswordSalt = passwordSalt;
     }
 
     public void AddPoints(int points, RewardTransaction transaction) // Add points to the account

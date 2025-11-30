@@ -8,7 +8,7 @@ public interface IUserService
     /// <summary>
     /// Registers a new user with the specified role.
     /// </summary>
-    Task<UserProfile> RegisterUserAsync(string employeeId, string email, string firstName, string lastName, UserRole role);
+    Task<UserProfile> RegisterUserAsync(string employeeId, string email, string firstName, string lastName, UserRole role, string password);
 
     /// <summary>
     /// Gets a user profile by email.

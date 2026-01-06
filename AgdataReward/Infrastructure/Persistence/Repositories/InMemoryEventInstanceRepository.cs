@@ -15,6 +15,11 @@ public class InMemoryEventInstanceRepository : IEventInstanceRepository
         _instances.Add(instance);
         return Task.CompletedTask;
     }
+    public Task UpdateAsync(EventInstance instance)
+    {
+        return Task.CompletedTask;
+    }
+
 
     public Task<IEnumerable<EventInstance>> ListAsync()
         => Task.FromResult<IEnumerable<EventInstance>>(_instances);

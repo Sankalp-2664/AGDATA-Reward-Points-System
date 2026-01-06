@@ -10,7 +10,7 @@ public class RewardDbContextFactory : IDesignTimeDbContextFactory<RewardDbContex
     {
         var environment = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") ?? "Development";
 
-        var basePath = Path.Combine(Directory.GetCurrentDirectory(), "..", "Api", "Api.Server");
+        var basePath = Directory.GetCurrentDirectory();
 
         var configuration = new ConfigurationBuilder()
             .SetBasePath(basePath)

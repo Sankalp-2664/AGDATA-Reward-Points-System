@@ -87,6 +87,7 @@ builder.Services.AddScoped<IRewardPointsRepository, RewardPointsRepository>();
 builder.Services.AddScoped<IRewardTransactionRepository, RewardTransactionRepository>();
 builder.Services.AddScoped<IRedemptionRecordRepository, RedemptionRecordRepository>();
 builder.Services.AddScoped<IRedemptionRequestRepository, RedemptionRequestRepository>();
+builder.Services.AddScoped<IRoleRepository, RoleRepository>();
 builder.Services.AddScoped<IJwtTokenGenerator, JwtTokenGenerator>();
 builder.Services.AddScoped<IPasswordHasher, PasswordHasher>();
 

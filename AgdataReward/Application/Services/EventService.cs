@@ -97,4 +97,18 @@ public class EventService(
         await _definitionRepo.UpdateAsync(eventDefinition);
         return eventDefinition;
     }
+
+    public async Task ParticipateAsync(Guid eventInstanceId, Guid userId)
+    {
+        if (eventInstanceId == Guid.Empty)
+            throw new ArgumentException("Invalid event instance id.");
+
+        var instance = await _instanceRepo.GetByIdAsync(eventInstanceId)
+            ?? throw new ArgumentException("Event instance not found.");
+
+        instance.AddParticipant(userId);
+
+        await _instanceRepo.UpdateAsync(instance);
+    }
+
 }

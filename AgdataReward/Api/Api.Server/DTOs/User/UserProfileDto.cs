@@ -23,7 +23,7 @@ public sealed class UserProfileDto
     public string Email { get; set; } = string.Empty;
 
     /// <summary>User role as string (e.g. "Admin").</summary>
-    public string Role { get; set; } = string.Empty;
+    public IEnumerable<string> Roles { get; set; } = [];
 
     /// <summary>Reward account information for the user, if available.</summary>
     public UserAccountDto? Account { get; set; }

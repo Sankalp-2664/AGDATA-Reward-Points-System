@@ -1,5 +1,4 @@
 ﻿using Domain.Entities.User;
-using Domain.Enums;
 
 namespace Application.Interfaces;
 
@@ -8,7 +7,7 @@ public interface IUserService
     /// <summary>
     /// Registers a new user with the specified role.
     /// </summary>
-    Task<UserProfile> RegisterUserAsync(string employeeId, string email, string firstName, string lastName, UserRole role, string password);
+    Task<UserProfile> RegisterUserAsync(string employeeId, string email, string firstName, string lastName, string roleName, string password);
 
     /// <summary>
     /// Gets a user profile by email.

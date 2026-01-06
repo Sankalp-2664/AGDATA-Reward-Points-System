@@ -14,6 +14,7 @@ public interface IEventApiService
 
     Task AssignWinnerAsync(Guid eventInstanceId, Guid userId, int rank, CancellationToken cancellationToken = default);
     Task AddRewardRuleAsync(Guid eventId, Guid rewardPointsId, int rank, CancellationToken cancellationToken = default);
+    Task ParticipateAsync(Guid eventInstanceId, Guid userId, CancellationToken cancellationToken = default);
 }
 
 public class EventApiService(
@@ -85,5 +86,13 @@ public class EventApiService(
         CancellationToken cancellationToken = default)
     {
         await _eventService.AddRewardRuleAsync(eventId, rank, rewardPointsId);
+    }
+
+    public async Task ParticipateAsync(
+    Guid eventInstanceId,
+    Guid userId,
+    CancellationToken cancellationToken = default)
+    {
+        await _eventService.ParticipateAsync(eventInstanceId, userId);
     }
 }

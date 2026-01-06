@@ -1,5 +1,4 @@
-﻿using Domain.Enums;
-using Domain.ValueObjects;
+﻿using Domain.ValueObjects;
 
 namespace Domain.Entities.User
 {
@@ -34,18 +33,19 @@ namespace Domain.Entities.User
         public Email Email { get; private set; } = null!;
 
         /// <summary>
-        /// Role of the user.
-        /// </summary>
-        public UserRole Role { get; private set; }
-
-        /// <summary>
         /// Navigation property to the user's account.
         /// </summary>
         public virtual UserAccount? Account { get; private set; }
 
+        /// <summary>
+        /// Roles assigned to the user.
+        /// </summary>
+        private readonly List<UserRole> _roles = new();
+        public IReadOnlyCollection<UserRole> Roles => _roles.AsReadOnly();
+
         protected UserProfile() { } // For EF Core
 
-        public UserProfile(EmployeeId employeeId, Email email, string firstName, string lastName, UserRole role)
+        public UserProfile(EmployeeId employeeId, Email email, string firstName, string lastName)
         {
             Id = Guid.NewGuid();
 
@@ -59,15 +59,47 @@ namespace Domain.Entities.User
 
             FirstName = firstName.Trim();
             LastName = lastName.Trim();
-            Role = role;
         }
 
-        public void AttachAccount(UserAccount account)
+        public void AttachAccount(UserAccount account) 
         {
-            if (account == null) throw new ArgumentNullException(nameof(account));
-            if (account.UserId != Id) throw new ArgumentException("Account UserId must match UserProfile Id.", nameof(account));
+            if (account == null) 
+                throw new ArgumentNullException(nameof(account)); 
+            
+            if (account.UserId != Id) 
+                throw new ArgumentException("Account UserId must match UserProfile Id.", 
+                    nameof(account)); 
 
-            Account = account;
+            Account = account; 
+        }
+
+        /// <summary>
+        /// Assigns a role to the user.
+        /// </summary>
+        public void AssignRole(Role role)
+        {
+            if (role == null)
+                throw new ArgumentNullException(nameof(role));
+
+            if (_roles.Any(r => r.RoleId == role.Id))
+                throw new InvalidOperationException("User already has this role.");
+
+            _roles.Add(new UserRole(Id, role.Id));
+        }
+
+        /// <summary>
+        /// Removes a role from the user.
+        /// </summary>
+        public void RemoveRole(Role role)
+        {
+            if (role == null)
+                throw new ArgumentNullException(nameof(role));
+
+            var existing = _roles.FirstOrDefault(r => r.RoleId == role.Id);
+            if (existing == null)
+                throw new InvalidOperationException("User does not have this role.");
+
+            _roles.Remove(existing);
         }
 
         /// <summary>
@@ -75,8 +107,10 @@ namespace Domain.Entities.User
         /// </summary>
         public void UpdateName(string firstName, string lastName)
         {
-            if (string.IsNullOrWhiteSpace(firstName)) throw new ArgumentException("First name is required.", nameof(firstName));
-            if (string.IsNullOrWhiteSpace(lastName)) throw new ArgumentException("Last name is required.", nameof(lastName));
+            if (string.IsNullOrWhiteSpace(firstName))
+                throw new ArgumentException("First name is required.", nameof(firstName));
+            if (string.IsNullOrWhiteSpace(lastName))
+                throw new ArgumentException("Last name is required.", nameof(lastName));
 
             FirstName = firstName.Trim();
             LastName = lastName.Trim();

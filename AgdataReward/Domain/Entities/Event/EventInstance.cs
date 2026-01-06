@@ -26,6 +26,21 @@ public class EventInstance
         EventId = eventId;
     }
 
+    private readonly HashSet<Guid> _participantIds = new();
+    public IReadOnlyCollection<Guid> ParticipantIds => _participantIds;
+
+    public void AddParticipant(Guid userId)
+    {
+        if (userId == Guid.Empty)
+            throw new ArgumentException("UserId cannot be empty.");
+
+        if (_participantIds.Contains(userId))
+            throw new InvalidOperationException("You have already participated.");
+
+        _participantIds.Add(userId);
+    }
+
+
     /// <summary>
     /// Assigns a winner to this event instance.
     /// </summary>

@@ -30,4 +30,11 @@ public class EventInstanceRepository(RewardDbContext context) : IEventInstanceRe
             .Include(i => i.WinnerUser) // optional
             .ToListAsync();
     }
+
+    public async Task UpdateAsync(EventInstance instance)
+    {
+        _context.EventInstances.Update(instance);
+        await _context.SaveChangesAsync();
+    }
+
 }

@@ -80,15 +80,21 @@ public class MappingProfile : Profile
         CreateMap<RewardTransaction, Top3EmployeeRewardDto>().ReverseMap();
 
         // =========================
+        // =========================
         // User mappings
         // =========================
         CreateMap<UserProfile, UserProfileDto>()
-            .ForMember(dest => dest.EmployeeId, opt => opt.MapFrom(src => src.EmployeeId.Value))
-            .ForMember(dest => dest.Email, opt => opt.MapFrom(src => src.Email.Value))
-            .ForMember(dest => dest.Role, opt => opt.MapFrom(src => src.Role.ToString()))
-            .ForMember(dest => dest.Account, opt => opt.MapFrom(src => src.Account));
+            .ForMember(dest => dest.EmployeeId,
+                opt => opt.MapFrom(src => src.EmployeeId.Value))
+            .ForMember(dest => dest.Email,
+                opt => opt.MapFrom(src => src.Email.Value))
+            .ForMember(dest => dest.Roles,
+                opt => opt.MapFrom(src => src.Roles.Select(r => r.Role.Name)))
+            .ForMember(dest => dest.Account,
+                opt => opt.MapFrom(src => src.Account));
 
         CreateMap<UserAccount, UserAccountDto>()
-            .ForMember(dest => dest.Status, opt => opt.MapFrom(src => src.Status.ToString()));
+            .ForMember(dest => dest.Status,
+                opt => opt.MapFrom(src => src.Status.ToString()));
     }
 }

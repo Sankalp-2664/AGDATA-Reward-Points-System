@@ -26,9 +26,13 @@ public class JwtTokenGenerator : IJwtTokenGenerator
         {
             new(JwtRegisteredClaimNames.Sub, user.Id.ToString()),
             new(JwtRegisteredClaimNames.Email, user.Email.Value),
-            new(ClaimTypes.Role, user.Role.ToString()),
             new("employeeId", user.EmployeeId.Value)
         };
+
+        foreach (var userRole in user.Roles)
+        {
+            claims.Add(new Claim(ClaimTypes.Role, userRole.Role.Name));
+        }
 
         var expires = DateTime.UtcNow.AddMinutes(_jwtSettings.ExpireMinutes);
 

@@ -1,5 +1,4 @@
 ﻿using Domain.Entities.User;
-using Domain.Enums;
 using Domain.ValueObjects;
 using FluentAssertions;
 
@@ -11,20 +10,16 @@ public class UserProfileTests
     public void Constructor_Should_Throw_When_EmployeeId_Is_Null()
     {
         // Arrange
-        var id = Guid.NewGuid();
         var email = new Email("test@agdata.com");
         var firstName = "John";
         var lastName = "Doe";
-        var role = UserRole.User;
 
         // Act
         Action act = () => new UserProfile(
-            id,
             null!,
             email,
             firstName,
-            lastName,
-            role
+            lastName
         );
 
         // Assert
@@ -36,20 +31,16 @@ public class UserProfileTests
     public void Constructor_Should_Throw_When_Email_Is_Null()
     {
         // Arrange
-        var id = Guid.NewGuid();
         var employeeId = new EmployeeId("EMP001");
         var firstName = "John";
         var lastName = "Doe";
-        var role = UserRole.User;
 
         // Act
         Action act = () => new UserProfile(
-            id,
             employeeId,
             null!,
             firstName,
-            lastName,
-            role
+            lastName
         );
 
         // Assert
@@ -64,21 +55,18 @@ public class UserProfileTests
         var employeeId = new EmployeeId("EMP001");
         var email = new Email("test@agdata.com");
         var lastName = "Doe";
-        var role = UserRole.User;
 
         // Act
         Action act = () => new UserProfile(
-            Guid.NewGuid(),
             employeeId,
             email,
             "",
-            lastName,
-            role
+            lastName
         );
 
         // Assert
-        act.Should().Throw<ArgumentNullException>()
-            .WithMessage("*First Name is required*");
+        act.Should().Throw<ArgumentException>()
+            .WithMessage("*First name is required*");
     }
 
     [Fact]
@@ -88,58 +76,77 @@ public class UserProfileTests
         var employeeId = new EmployeeId("EMP001");
         var email = new Email("test@agdata.com");
         var firstName = "John";
-        var role = UserRole.User;
 
         // Act
         Action act = () => new UserProfile(
-            Guid.NewGuid(),
             employeeId,
             email,
             firstName,
-            "",
-            role
+            ""
         );
 
         // Assert
-        act.Should().Throw<ArgumentNullException>()
-            .WithMessage("*Last Name is required*");
+        act.Should().Throw<ArgumentException>()
+            .WithMessage("*Last name is required*");
     }
 
     [Fact]
     public void Constructor_Should_Initialize_Values_Correctly()
     {
         // Arrange
-        var id = Guid.NewGuid();
         var employeeId = new EmployeeId("EMP001");
         var email = new Email("test@agdata.com");
         var firstName = "John";
         var lastName = "Doe";
-        var role = UserRole.Admin;
 
         // Act
-        var user = new UserProfile(id, employeeId, email, firstName, lastName, role);
+        var user = new UserProfile(employeeId, email, firstName, lastName);
 
         // Assert
-        user.Id.Should().Be(id);
+        user.Id.Should().NotBe(Guid.Empty);
         user.EmployeeId.Should().Be(employeeId);
         user.Email.Should().Be(email);
         user.FirstName.Should().Be(firstName);
         user.LastName.Should().Be(lastName);
-        user.Role.Should().Be(role);
         user.Account.Should().BeNull();
+        user.Roles.Should().BeEmpty(); // No roles assigned yet
     }
 
     [Fact]
-    public void Constructor_Should_Generate_New_Id_When_Empty()
+    public void AssignRole_Should_AddRoleToUser()
     {
         // Arrange
-        var employeeId = new EmployeeId("EMP002");
-        var email = new Email("test2@agdata.com");
+        var employeeId = new EmployeeId("EMP003");
+        var email = new Email("test3@agdata.com");
+        var user = new UserProfile(employeeId, email, "Alice", "Smith");
+
+        var role = new Role("USER");
 
         // Act
-        var user = new UserProfile(Guid.Empty, employeeId, email, "Alice", "Smith", UserRole.User);
+        user.AssignRole(role);
 
         // Assert
-        user.Id.Should().NotBe(Guid.Empty);
+        user.Roles.Should().HaveCount(1);
+        user.Roles.First().RoleId.Should().Be(role.Id);
+        user.Roles.First().UserId.Should().Be(user.Id);
+    }
+
+    [Fact]
+    public void AssignRole_Should_Throw_WhenRoleAlreadyAssigned()
+    {
+        // Arrange
+        var employeeId = new EmployeeId("EMP004");
+        var email = new Email("test4@agdata.com");
+        var user = new UserProfile(employeeId, email, "Bob", "Brown");
+
+        var role = new Role("USER");
+        user.AssignRole(role);
+
+        // Act
+        Action act = () => user.AssignRole(role);
+
+        // Assert
+        act.Should().Throw<InvalidOperationException>()
+            .WithMessage("User already has this role.");
     }
 }

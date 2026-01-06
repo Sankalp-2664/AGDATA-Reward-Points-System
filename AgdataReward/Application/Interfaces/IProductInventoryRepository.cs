@@ -1,15 +1,11 @@
-﻿using Domain.Entities;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using Domain.Entities.Product;
 
 namespace Application.Interfaces;
 
 public interface IProductInventoryRepository
 {
     Task<ProductInventory?> GetByProductIdAsync(Guid productId);
+    Task AddAsync(ProductInventory inventory);
     Task UpdateAsync(ProductInventory inventory);
 }
 

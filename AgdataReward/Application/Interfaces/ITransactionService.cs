@@ -1,14 +1,11 @@
-﻿using Domain.Entities;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using Domain.Entities.Reward;
 
-namespace Application.Interfaces
+namespace Application.Interfaces;
+
+public interface ITransactionService
 {
-    public interface ITransactionService
-    {
-        Task<IEnumerable<RewardTransaction>> GetUserTransactionsAsync(Guid userId);
-    }
+    Task<IEnumerable<RewardTransaction>> GetUserTransactionsAsync(Guid userId);
+    Task<RewardPoints> CreateRewardPointsAsync(int pointsValue);
+    Task<RewardPoints?> GetRewardPointsByIdAsync(Guid id);
+    Task<IEnumerable<RewardPoints>> ListRewardPointsAsync();
 }

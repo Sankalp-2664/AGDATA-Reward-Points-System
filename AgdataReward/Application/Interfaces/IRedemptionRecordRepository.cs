@@ -1,15 +1,10 @@
-﻿using Domain.Entities;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using Domain.Entities.Redemption;
 
-namespace Application.Interfaces
+namespace Application.Interfaces;
+
+public interface IRedemptionRecordRepository
 {
-    public interface IRedemptionRecordRepository
-    {
-        Task<RedemptionRecord?> GetByIdAsync(Guid id);
-        Task AddAsync(RedemptionRecord record);
-    }
+    Task<RedemptionRecord?> GetByIdAsync(Guid id);
+    Task AddAsync(RedemptionRecord record);
+    Task<IEnumerable<RedemptionRecord>> GetAllAsync();
 }

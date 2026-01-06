@@ -4,12 +4,11 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Domain.Enums
+namespace Domain.Enums;
+
+public enum AccountStatus
 {
-    public enum AccountStatus
-    {
-        Active = 0,
-        Inactive = 1
-    }
+    Active = 0,
+    Inactive = 1
 }
 

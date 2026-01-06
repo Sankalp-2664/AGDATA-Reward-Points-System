@@ -1,29 +1,39 @@
 ﻿using Application.Interfaces;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using Domain.Entities.Product;
+using Domain.ValueObjects;
 
-namespace Infrastructure.Persistence.Repositories
+namespace Infrastructure.Persistence.Repositories;
+
+public class InMemoryProductRepository : IProductRepository
 {
-    public class InMemoryProductRepository : IProductRepository
+    private readonly List<ProductInformation> _products = new();
+
+    public Task<ProductInformation?> GetByIdAsync(Guid id)
+        => Task.FromResult(_products.FirstOrDefault(p => p.Id == id));
+
+    public Task<ProductInformation?> GetBySkuAsync(SKU sku)
     {
-        private readonly List<ProductInfo> _products = new();
-
-        public Task<ProductInfo?> GetByIdAsync(Guid id)
-            => Task.FromResult(_products.FirstOrDefault(p => p.Id == id));
-
-        public Task<ProductInfo?> GetBySkuAsync(string sku)
-            => Task.FromResult(_products.FirstOrDefault(p => p.SKU.Equals(sku, StringComparison.OrdinalIgnoreCase)));
-
-        public Task AddAsync(ProductInfo product)
-        {
-            _products.Add(product);
-            return Task.CompletedTask;
-        }
-
-        public Task<IEnumerable<ProductInfo>> ListAsync()
-            => Task.FromResult<IEnumerable<ProductInfo>>(_products);
+        return Task.FromResult(
+            _products.FirstOrDefault(p => p.SKU.Equals(sku))
+        );
     }
+
+    public Task AddAsync(ProductInformation product)
+    {
+        _products.Add(product);
+        return Task.CompletedTask;
+    }
+
+    public Task<IEnumerable<ProductInformation>> ListAsync()
+        => Task.FromResult<IEnumerable<ProductInformation>>(_products);
+
+    public Task DeleteAsync(Guid id)
+    {
+        var item = _products.FirstOrDefault(p => p.Id == id);
+        if (item != null)
+            _products.Remove(item);
+
+        return Task.CompletedTask;
+    }
+
 }

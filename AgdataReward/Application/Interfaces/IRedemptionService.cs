@@ -1,17 +1,12 @@
-﻿using Domain.Entities;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using Domain.Entities.Redemption;
 
-namespace Application.Interfaces
+namespace Application.Interfaces;
+
+public interface IRedemptionService
 {
-    public interface IRedemptionService
-    {
-        Task<RedemptionRecord> RequestRedemptionAsync(Guid userId, Guid productId);
-        Task ApproveRedemptionAsync(Guid redemptionId);
-        Task RejectRedemptionAsync(Guid redemptionId);
-        Task CompleteRedemptionAsync(Guid redemptionId);
-    }
+    Task<RedemptionRecord> RequestRedemptionAsync(Guid userId, Guid productId);
+    Task ApproveRedemptionAsync(Guid redemptionId);
+    Task RejectRedemptionAsync(Guid redemptionId);
+    Task CompleteRedemptionAsync(Guid redemptionId);
+    Task<RedemptionRecord?> GetRedemptionByIdAsync(Guid redemptionId);
 }

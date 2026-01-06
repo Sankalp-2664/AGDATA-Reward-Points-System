@@ -1,16 +1,13 @@
-﻿using Domain.Entities;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using Domain.Entities.Product;
+using Domain.ValueObjects;
 
 namespace Application.Interfaces;
 
 public interface IProductRepository
 {
-    Task<ProductInfo?> GetByIdAsync(Guid id);
-    Task<ProductInfo?> GetBySkuAsync(string sku);
-    Task AddAsync(ProductInfo product);
-    Task<IEnumerable<ProductInfo>> ListAsync();
+    Task<ProductInformation?> GetByIdAsync(Guid id);
+    Task<ProductInformation?> GetBySkuAsync(SKU sku);
+    Task AddAsync(ProductInformation product);
+    Task<IEnumerable<ProductInformation>> ListAsync();
+    Task DeleteAsync(Guid id);
 }

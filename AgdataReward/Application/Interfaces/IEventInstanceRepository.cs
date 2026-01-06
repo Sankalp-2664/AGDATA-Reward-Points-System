@@ -1,16 +1,10 @@
-﻿using Domain.Entities;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using Domain.Entities.Event;
 
-namespace Application.Interfaces
+namespace Application.Interfaces;
+
+public interface IEventInstanceRepository
 {
-    public interface IEventInstanceRepository
-    {
-        Task<EventInstance?> GetByIdAsync(Guid id);
-        Task AddAsync(EventInstance instance);
-        Task<IEnumerable<EventInstance>> ListAsync();
-    }
+    Task<EventInstance?> GetByIdAsync(Guid id);
+    Task AddAsync(EventInstance instance);
+    Task<IEnumerable<EventInstance>> ListAsync();
 }

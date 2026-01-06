@@ -1,15 +1,12 @@
-﻿using Domain.Entities;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using Domain.Entities.Product;
 
-namespace Application.Interfaces
+namespace Application.Interfaces;
+
+public interface IProductService
 {
-    public interface IProductService
-    {
-        Task<ProductInfo> AddProductAsync(string sku, string name, Guid rewardPointsId);
-        Task<IEnumerable<ProductInfo>> GetCatalogAsync();
-    }
+    Task<ProductInformation> AddProductAsync(string sku, string name, Guid rewardPointsId);
+    Task<IEnumerable<ProductInformation>> GetCatalogAsync();
+    Task<ProductInformation?> GetByIdAsync(Guid id);
+    Task<bool> DeleteProductAsync(Guid id);
+
 }

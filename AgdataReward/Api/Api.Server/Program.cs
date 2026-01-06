@@ -1,32 +1,160 @@
+using Api.Server.Mappings;
+using Api.Server.Services;
+using Application.Configuration;
 using Application.Interfaces;
 using Application.Services;
+using Infrastructure.Authentication;
+using Infrastructure.Persistence;
 using Infrastructure.Persistence.Repositories;
+using Infrastructure.Security;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
+using Microsoft.OpenApi.Models;
+using System.IdentityModel.Tokens.Jwt;
+using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// framework services
+// --------------------------------------------------------
+// 1. Framework services
+// --------------------------------------------------------
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+builder.Services.AddSwaggerGen(c =>
+{
+    c.SwaggerDoc("v1", new OpenApiInfo
+    {
+        Title = "Reward API v1",
+        Version = "v1"
+    });
 
-// ?? Register In-Memory Repositories for Milestone 1
-builder.Services.AddSingleton<IUserRepository, InMemoryUserRepository>();
-builder.Services.AddSingleton<IUserAccountRepository, InMemoryUserAccountRepository>();
-builder.Services.AddSingleton<IEventDefinitionRepository, InMemoryEventDefinitionRepository>();
-builder.Services.AddSingleton<IEventRewardRuleRepository, InMemoryEventRewardRuleRepository>();
-builder.Services.AddSingleton<IEventInstanceRepository, InMemoryEventInstanceRepository>();
-builder.Services.AddSingleton<IProductRepository, InMemoryProductRepository>();
-builder.Services.AddSingleton<IProductInventoryRepository, InMemoryProductInventoryRepository>();
-builder.Services.AddSingleton<IRewardPointsRepository, InMemoryRewardPointsRepository>();
-builder.Services.AddSingleton<IRewardTransactionRepository, InMemoryRewardTransactionRepository>();
-builder.Services.AddSingleton<IRedemptionRecordRepository, InMemoryRedemptionRecordRepository>();
-builder.Services.AddSingleton<IRedemptionProcessRepository, InMemoryRedemptionProcessRepository>();
+    var securityScheme = new OpenApiSecurityScheme
+    {
+        Name = "Authorization",
+        Description = "Enter 'Bearer {token}'",
+        In = ParameterLocation.Header,
+        Type = SecuritySchemeType.Http,
+        Scheme = "Bearer",
+        BearerFormat = "JWT",
+        Reference = new OpenApiReference
+        {
+            Type = ReferenceType.SecurityScheme,
+            Id = "Bearer"
+        }
+    };
 
-// ?? Register Application Services
+    c.AddSecurityDefinition("Bearer", securityScheme);
+
+    c.AddSecurityRequirement(new OpenApiSecurityRequirement
+    {
+        { securityScheme, Array.Empty<string>() }
+    });
+});
+
+
+// --------------------------------------------------------
+// 2. DbContext
+// --------------------------------------------------------
+builder.Services.AddDbContext<RewardDbContext>(options =>
+    options.UseSqlServer(builder.Configuration.GetConnectionString("RewardDb")));
+
+// --------------------------------------------------------
+// 3. Repository registrations
+// --------------------------------------------------------
+
+// In-memory repos (Milestone 1)
+//builder.Services.AddSingleton<IUserRepository, InMemoryUserRepository>();
+//builder.Services.AddSingleton<IUserAccountRepository, InMemoryUserAccountRepository>();
+//builder.Services.AddSingleton<IEventDefinitionRepository, InMemoryEventDefinitionRepository>();
+//builder.Services.AddSingleton<IEventRewardRuleRepository, InMemoryEventRewardRuleRepository>();
+//builder.Services.AddSingleton<IEventInstanceRepository, InMemoryEventInstanceRepository>();
+//builder.Services.AddSingleton<IProductRepository, InMemoryProductRepository>();
+//builder.Services.AddSingleton<IProductInventoryRepository, InMemoryProductInventoryRepository>();
+//builder.Services.AddSingleton<IRewardPointsRepository, InMemoryRewardPointsRepository>();
+//builder.Services.AddSingleton<IRewardTransactionRepository, InMemoryRewardTransactionRepository>();
+//builder.Services.AddSingleton<IRedemptionRecordRepository, InMemoryRedemptionRecordRepository>();
+//builder.Services.AddSingleton<IRedemptionRequestRepository, InMemoryRedemptionRequestRepository>();
+
+builder.Services.AddScoped<IUserRepository, UserRepository>();
+builder.Services.AddScoped<IUserAccountRepository, UserAccountRepository>();
+builder.Services.AddScoped<IEventDefinitionRepository, EventDefinitionRepository>();
+builder.Services.AddScoped<IEventRewardRuleRepository, EventRewardRuleRepository>();
+builder.Services.AddScoped<IEventInstanceRepository, EventInstanceRepository>();
+builder.Services.AddScoped<IProductRepository, ProductRepository>();
+builder.Services.AddScoped<IProductInventoryRepository, ProductInventoryRepository>();
+builder.Services.AddScoped<IRewardPointsRepository, RewardPointsRepository>();
+builder.Services.AddScoped<IRewardTransactionRepository, RewardTransactionRepository>();
+builder.Services.AddScoped<IRedemptionRecordRepository, RedemptionRecordRepository>();
+builder.Services.AddScoped<IRedemptionRequestRepository, RedemptionRequestRepository>();
+builder.Services.AddScoped<IJwtTokenGenerator, JwtTokenGenerator>();
+builder.Services.AddScoped<IPasswordHasher, PasswordHasher>();
+
+
+// --------------------------------------------------------
+// 4. Application services
+// --------------------------------------------------------
 builder.Services.AddScoped<IEventService, EventService>();
-builder.Services.AddScoped<IRedemptionService, RedemptionService>();
 builder.Services.AddScoped<IInventoryService, InventoryService>();
+builder.Services.AddScoped<IProductService, ProductService>();
+builder.Services.AddScoped<IRedemptionService, RedemptionService>();
+builder.Services.AddScoped<ITransactionService, TransactionService>();
+builder.Services.AddScoped<IUserService, UserService>();
+builder.Services.AddScoped<IAuthService, AuthService>();
+builder.Services.AddScoped<IUserApiService, UserApiService>();
+builder.Services.AddScoped<IRedemptionApiService, RedemptionApiService>();
+builder.Services.AddScoped<IProductApiService, ProductApiService>();
+builder.Services.AddScoped<IInventoryApiService, InventoryApiService>();
+builder.Services.AddScoped<IEventApiService, EventApiService>();
 
+
+builder.Services.AddAutoMapper(typeof(MappingProfile));
+
+// --------------------------------------------------------
+// 5. JWT settings + authentication
+// --------------------------------------------------------
+
+builder.Services.Configure<JwtSettings>(builder.Configuration.GetSection("Jwt"));
+
+builder.Services.AddSingleton(sp =>
+    sp.GetRequiredService<Microsoft.Extensions.Options.IOptions<JwtSettings>>().Value);
+
+var jwtSettings = builder.Configuration
+    .GetSection("Jwt")
+    .Get<JwtSettings>()
+    ?? throw new InvalidOperationException("Jwt configuration is missing.");
+
+// Clear default mapping so 'sub', 'role', etc. remain as-is
+JwtSecurityTokenHandler.DefaultInboundClaimTypeMap.Clear();
+
+var keyBytes = Encoding.UTF8.GetBytes(jwtSettings.Key);
+
+builder.Services
+    .AddAuthentication(options =>
+    {
+        options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+        options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+    })
+    .AddJwtBearer(options =>
+    {
+        options.TokenValidationParameters = new TokenValidationParameters
+        {
+            ValidateIssuer = true,
+            ValidateAudience = true,
+            ValidateLifetime = true,
+            ValidateIssuerSigningKey = true,
+
+            ValidIssuer = jwtSettings.Issuer,
+            ValidAudience = jwtSettings.Audience,
+            IssuerSigningKey = new SymmetricSecurityKey(keyBytes)
+        };
+    });
+
+builder.Services.AddAuthorization();
+
+// --------------------------------------------------------
+// 6. Build app
+// --------------------------------------------------------
 var app = builder.Build();
 
 if (app.Environment.IsDevelopment())
@@ -35,15 +163,19 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI(c =>
     {
         c.SwaggerEndpoint("/swagger/v1/swagger.json", "Reward API v1");
-        c.RoutePrefix = string.Empty;  // opens directly at http://localhost:5106/
+        c.RoutePrefix = "swagger";
     });
 }
 
-// Run milestone-1 demo before starting the web server
-await Api.Server.Milestone1.Milestone1Program.Run();
+// app.UseHttpsRedirection(); // enable when you want HTTPS
 
-app.UseHttpsRedirection();
+app.UseRouting();
+
+app.UseAuthentication();
 app.UseAuthorization();
+
 app.MapControllers();
+
+await DbSeeder.SeedAsync(app.Services);
 
 app.Run();

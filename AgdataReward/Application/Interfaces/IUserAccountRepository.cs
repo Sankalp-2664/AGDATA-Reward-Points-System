@@ -1,14 +1,10 @@
-﻿using Domain.Entities;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using Domain.Entities.User;
 
 namespace Application.Interfaces;
 
 public interface IUserAccountRepository
 {
     Task<UserAccount?> GetByUserIdAsync(Guid userId);
+    Task AddAsync(UserAccount account);
     Task UpdateAsync(UserAccount account);
 }

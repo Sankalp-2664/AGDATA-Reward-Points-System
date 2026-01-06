@@ -1,35 +1,159 @@
-﻿using Application.Interfaces;
+﻿using Api.Server.DTOs.Product;
+using Api.Server.Services;
+using Application.Interfaces;
+using AutoMapper;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
-namespace Api.Server.Controllers
+namespace Api.Server.Controllers;
+
+/// <summary>
+/// Manages reward products and their metadata.
+/// </summary>
+[ApiController]
+[Route("api/[controller]")]
+[Authorize] // All endpoints in this controller require a valid JWT
+public class ProductController(IProductApiService productApiService) : ControllerBase
 {
-    [ApiController]
-    [Route("api/[controller]")]
-    public class ProductController : ControllerBase
+    private readonly IProductApiService _productApiService = productApiService;
+
+
+    /// <summary>
+    /// Creates a new product in the reward catalog.
+    /// </summary>
+    /// <param name="dto">Product creation payload.</param>
+    /// <returns>The newly created product.</returns>
+    /// <remarks>
+    /// Sample request:
+    ///
+    ///     POST /api/product
+    ///     {
+    ///       "sku": "ITEM-001",
+    ///       "name": "Coffee Mug",
+    ///       "rewardPointsId": "a3b5c7d9-0000-1111-2222-333344445555"
+    ///     }
+    ///
+    /// </remarks>
+    /// <response code="201">Returns the newly created product.</response>
+    /// <response code="400">If the payload is invalid.</response>
+    /// <response code="401">If the caller is not authenticated.</response>
+    /// <response code="403">If the caller is not an admin.</response>
+    /// <response code="409">If a product with the same SKU already exists.</response>
+    [HttpPost]
+    [Authorize(Roles = "Admin")] // only Admin can create products
+    [ProducesResponseType(typeof(ProductInformationDto), StatusCodes.Status201Created)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(StatusCodes.Status409Conflict)]
+    public async Task<IActionResult> Create([FromBody] ProductInformationCreateDto dto)
     {
-        private readonly IProductService _productService;
-        private readonly IInventoryService _inventoryService;
+        if (!ModelState.IsValid)
+            return BadRequest(ModelState);
 
-        public ProductController(IProductService productService, IInventoryService inventoryService)
+        try
         {
-            _productService = productService;
-            _inventoryService = inventoryService;
+            var result = await _productApiService.CreateProductAsync(dto);
+            return CreatedAtAction(nameof(GetById), new { id = result.Id }, result);
         }
+        catch (InvalidOperationException ex)
+        {
+            return Conflict(new { message = ex.Message });
+        }
+        catch (ArgumentException ex)
+        {
+            return BadRequest(new { message = ex.Message });
+        }
+    }
 
-        // POST: api/product
-        [HttpPost]
-        public async Task<IActionResult> CreateProduct([FromBody] ProductInfo dto)
-        {
-            var product = await _productService.AddProductAsync(dto.SKU, dto.Name, dto.RewardPointsId);
-            return Ok(product);
-        }
+    /// <summary>
+    /// Retrieves all products available in the reward catalog.
+    /// </summary>
+    /// <returns>List of products with associated reward points info.</returns>
+    /// <remarks>
+    /// Sample request:
+    ///
+    ///     GET /api/product
+    ///
+    /// Sample response:
+    ///
+    ///     200 OK
+    ///     [
+    ///       {
+    ///         "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+    ///         "sku": "ITEM-001",
+    ///         "name": "Coffee Mug",
+    ///         "rewardPointsId": "a3b5c7d9-0000-1111-2222-333344445555",
+    ///         "rewardPointsValue": 100
+    ///       }
+    ///     ]
+    /// </remarks>
+    /// <response code="200">Returns the list of products.</response>
+    /// <response code="401">If the caller is not authenticated.</response>
+    [HttpGet]
+    [ProducesResponseType(typeof(IEnumerable<ProductInformationDto>), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    public async Task<IActionResult> GetAll()
+    {
+        var result = await _productApiService.GetAllProductsAsync();
+        return Ok(result);
+    }
 
-        // PUT: api/product/{productId}/stock
-        [HttpPut("{productId:guid}/stock")]
-        public async Task<IActionResult> UpdateStock(Guid productId, [FromQuery] int change)
-        {
-            await _inventoryService.UpdateStockAsync(productId, change);
-            return Ok();
-        }
+    /// <summary>
+    /// Retrieves a single product by its identifier.
+    /// </summary>
+    /// <param name="id">Product identifier.</param>
+    /// <returns>The product with reward points info.</returns>
+    /// <remarks>
+    /// Sample request:
+    ///
+    ///     GET /api/product/{id}
+    ///
+    /// </remarks>
+    /// <response code="200">Returns the requested product.</response>
+    /// <response code="401">If the caller is not authenticated.</response>
+    /// <response code="404">If the product is not found.</response>
+    [HttpGet("{id:guid}")]
+    [ProducesResponseType(typeof(ProductInformationDto), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> GetById(Guid id)
+    {
+        var result = await _productApiService.GetProductByIdAsync(id);
+        if (result == null)
+            return NotFound();
+
+        return Ok(result);
+    }
+
+    /// <summary>
+    /// Deletes a product from the reward catalog.
+    /// </summary>
+    /// <param name="id">Product identifier.</param>
+    /// <returns>Status of the delete operation.</returns>
+    /// <remarks>
+    /// Sample request:
+    ///
+    ///     DELETE /api/product/{id}
+    ///
+    /// </remarks>
+    /// <response code="200">Product deleted successfully.</response>
+    /// <response code="401">If the caller is not authenticated.</response>
+    /// <response code="403">If the caller is not an admin.</response>
+    /// <response code="404">If the product was not found.</response>
+    [HttpDelete("{id:guid}")]
+    [Authorize(Roles = "Admin")] // only Admin can delete products
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> Delete(Guid id)
+    {
+        var deleted = await _productApiService.DeleteProductAsync(id);
+
+        if (!deleted)
+            return NotFound(new { message = "Product not found." });
+
+        return Ok(new { message = "Product deleted successfully." });
     }
 }

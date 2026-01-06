@@ -2,7 +2,6 @@
 using Domain.Entities.Redemption;
 using Domain.Enums;
 using Microsoft.EntityFrameworkCore;
-using System;
 
 namespace Infrastructure.Persistence.Repositories;
 

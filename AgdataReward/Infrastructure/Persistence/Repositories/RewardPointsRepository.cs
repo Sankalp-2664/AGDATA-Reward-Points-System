@@ -1,7 +1,6 @@
 ﻿using Application.Interfaces;
 using Domain.Entities.Reward;
 using Microsoft.EntityFrameworkCore;
-using System;
 
 namespace Infrastructure.Persistence.Repositories;
 

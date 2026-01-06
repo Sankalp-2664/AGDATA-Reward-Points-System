@@ -8,19 +8,21 @@ namespace Tests.Application.Tests.Services;
 public class ProductServiceTests
 {
     private ProductService BuildService(
-        out InMemoryProductRepository productRepo,
-        out InMemoryRewardPointsRepository pointsRepo)
+    out InMemoryProductRepository productRepo,
+    out InMemoryRewardPointsRepository pointsRepo,
+    out InMemoryProductInventoryRepository inventoryRepo)
     {
         productRepo = new InMemoryProductRepository();
         pointsRepo = new InMemoryRewardPointsRepository();
-        return new ProductService(productRepo, pointsRepo);
+        inventoryRepo = new InMemoryProductInventoryRepository();
+        return new ProductService(productRepo, pointsRepo, inventoryRepo);
     }
 
     [Fact]
     public async Task AddProduct_ShouldCreateProduct_WhenValid()
     {
         // Arrange
-        var service = BuildService(out var productRepo, out var pointsRepo);
+        var service = BuildService(out var productRepo, out var pointsRepo, out var inventoryRepo);
         var rp = new RewardPoints(Guid.NewGuid(), 100);
         await pointsRepo.AddAsync(rp);
 
@@ -42,7 +44,7 @@ public class ProductServiceTests
     [InlineData("", "Name")]
     public async Task AddProduct_ShouldThrow_WhenSkuIsNullOrEmpty(string sku, string name)
     {
-        var service = BuildService(out var productRepo, out var pointsRepo);
+        var service = BuildService(out var productRepo, out var pointsRepo, out var inventoryRepo);
         var rp = new RewardPoints(Guid.NewGuid(), 50);
         await pointsRepo.AddAsync(rp);
 
@@ -55,7 +57,7 @@ public class ProductServiceTests
     [InlineData("SKU1", "")]
     public async Task AddProduct_ShouldThrow_WhenNameIsNullOrEmpty(string sku, string name)
     {
-        var service = BuildService(out var productRepo, out var pointsRepo);
+        var service = BuildService(out var productRepo, out var pointsRepo, out var inventoryRepo);
         var rp = new RewardPoints(Guid.NewGuid(), 50);
         await pointsRepo.AddAsync(rp);
 
@@ -66,7 +68,7 @@ public class ProductServiceTests
     [Fact]
     public async Task AddProduct_ShouldThrow_WhenRewardPointsDoesNotExist()
     {
-        var service = BuildService(out var productRepo, out var pointsRepo);
+        var service = BuildService(out var productRepo, out var pointsRepo, out var inventoryRepo);
         var missingRpId = Guid.NewGuid();
 
         await Assert.ThrowsAsync<ArgumentException>(async () =>
@@ -76,7 +78,7 @@ public class ProductServiceTests
     [Fact]
     public async Task GetById_ShouldReturnProduct_WhenExists()
     {
-        var service = BuildService(out var productRepo, out var pointsRepo);
+        var service = BuildService(out var productRepo, out var pointsRepo, out var inventoryRepo);
         var rp = new RewardPoints(Guid.NewGuid(), 100);
         await pointsRepo.AddAsync(rp);
 
@@ -90,7 +92,7 @@ public class ProductServiceTests
     [Fact]
     public async Task GetById_ShouldReturnNull_WhenNotExists()
     {
-        var service = BuildService(out var productRepo, out var pointsRepo);
+        var service = BuildService(out var productRepo, out var pointsRepo, out var inventoryRepo);
         var notFound = await productRepo.GetByIdAsync(Guid.NewGuid());
         Assert.Null(notFound);
     }
@@ -98,7 +100,7 @@ public class ProductServiceTests
     [Fact]
     public async Task GetBySku_ShouldReturnProduct_WhenExists()
     {
-        var service = BuildService(out var productRepo, out var pointsRepo);
+        var service = BuildService(out var productRepo, out var pointsRepo, out var inventoryRepo);
         var rp = new RewardPoints(Guid.NewGuid(), 100);
         await pointsRepo.AddAsync(rp);
 
@@ -112,7 +114,7 @@ public class ProductServiceTests
     [Fact]
     public async Task GetBySku_ShouldReturnNull_WhenNotExists()
     {
-        var service = BuildService(out var productRepo, out var pointsRepo);
+        var service = BuildService(out var productRepo, out var pointsRepo, out var inventoryRepo);
         var fetched = await productRepo.GetBySkuAsync(new SKU("NOEXIST"));
         Assert.Null(fetched);
     }
@@ -120,7 +122,7 @@ public class ProductServiceTests
     [Fact]
     public async Task ListProducts_ShouldReturnAllAddedProducts()
     {
-        var service = BuildService(out var productRepo, out var pointsRepo);
+        var service = BuildService(out var productRepo, out var pointsRepo, out var inventoryRepo);
         var rp = new RewardPoints(Guid.NewGuid(), 100);
         await pointsRepo.AddAsync(rp);
 
@@ -135,7 +137,7 @@ public class ProductServiceTests
     [Fact]
     public async Task AddProduct_ShouldAllowMultipleProductsWithDifferentSkus()
     {
-        var service = BuildService(out var productRepo, out var pointsRepo);
+        var service = BuildService(out var productRepo, out var pointsRepo, out var inventoryRepo);
         var rp = new RewardPoints(Guid.NewGuid(), 100);
         await pointsRepo.AddAsync(rp);
 
@@ -161,7 +163,7 @@ public class ProductServiceTests
     [Fact]
     public async Task GetBySku_ShouldReturnNull_IfSkuIsNullOrEmpty()
     {
-        var service = BuildService(out var productRepo, out var pointsRepo);
+        var service = BuildService(out var productRepo, out var pointsRepo, out var inventoryRepo);
 
         var result1 = await productRepo.GetBySkuAsync(null!);
 
@@ -171,7 +173,7 @@ public class ProductServiceTests
     [Fact]
     public async Task GetBySku_ShouldBeCaseInsensitive()
     {
-        var service = BuildService(out var productRepo, out var pointsRepo);
+        var service = BuildService(out var productRepo, out var pointsRepo, out var inventoryRepo);
         var rp = new RewardPoints(Guid.NewGuid(), 10);
         await pointsRepo.AddAsync(rp);
 
@@ -185,7 +187,7 @@ public class ProductServiceTests
     [Fact]
     public async Task ListProducts_ShouldReturnEmptyList_IfNoneAdded()
     {
-        var service = BuildService(out var productRepo, out var pointsRepo);
+        var service = BuildService(out var productRepo, out var pointsRepo, out var inventoryRepo);
 
         var list = await productRepo.ListAsync();
 
@@ -196,7 +198,7 @@ public class ProductServiceTests
     [Fact]
     public async Task AddProduct_ShouldThrow_IfSkuContainsWhitespaceOnly()
     {
-        var service = BuildService(out var productRepo, out var pointsRepo);
+        var service = BuildService(out var productRepo, out var pointsRepo, out var inventoryRepo);
         var rp = new RewardPoints(Guid.NewGuid(), 10);
         await pointsRepo.AddAsync(rp);
 
@@ -207,7 +209,7 @@ public class ProductServiceTests
     [Fact]
     public async Task AddProduct_ShouldThrow_IfNameContainsWhitespaceOnly()
     {
-        var service = BuildService(out var productRepo, out var pointsRepo);
+        var service = BuildService(out var productRepo, out var pointsRepo, out var inventoryRepo);
         var rp = new RewardPoints(Guid.NewGuid(), 10);
         await pointsRepo.AddAsync(rp);
 
@@ -218,7 +220,7 @@ public class ProductServiceTests
     [Fact]
     public async Task AddProduct_ShouldAllowVeryLongSkuAndName()
     {
-        var service = BuildService(out var productRepo, out var pointsRepo);
+        var service = BuildService(out var productRepo, out var pointsRepo, out var inventoryRepo);
         var rp = new RewardPoints(Guid.NewGuid(), 10);
         await pointsRepo.AddAsync(rp);
 
@@ -237,7 +239,8 @@ public class ProductServiceTests
         // Simulate repo throwing on AddAsync
         var productRepo = new InMemoryProductRepository();
         var pointsRepo = new ThrowingRewardPointsRepository();
-        var service = new ProductService(productRepo, pointsRepo);
+        var inventoryRepo = new InMemoryProductInventoryRepository();
+        var service = new ProductService(productRepo, pointsRepo, inventoryRepo);
 
         var rpId = Guid.NewGuid();
 

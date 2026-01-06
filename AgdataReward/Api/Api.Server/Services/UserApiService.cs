@@ -1,7 +1,6 @@
 ﻿using Api.Server.DTOs.User;
 using Application.Interfaces;
 using AutoMapper;
-using Domain.Enums;
 
 namespace Api.Server.Services;
 
@@ -38,15 +37,12 @@ public class UserApiService(
         UserProfileCreateDto dto,
         CancellationToken cancellationToken = default)
     {
-        // Move role parsing here (keep controller clean)
-        var role = Enum.Parse<UserRole>(dto.Role, ignoreCase: true);
-
         var user = await _userService.RegisterUserAsync(
             dto.EmployeeId,
             dto.Email,
             dto.FirstName,
             dto.LastName,
-            role,
+            dto.Role,
             dto.Password);
 
         return _mapper.Map<UserProfileDto>(user);

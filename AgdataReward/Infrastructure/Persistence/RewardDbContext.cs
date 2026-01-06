@@ -16,6 +16,8 @@ public class RewardDbContext : DbContext
     // Users
     public DbSet<UserProfile> UserProfiles { get; set; } = null!;
     public DbSet<UserAccount> UserAccounts { get; set; } = null!;
+    public DbSet<Role> Roles { get; set; } = null!;
+    public DbSet<UserRole> UserRoles { get; set; } = null!;
 
     // Rewards & Transactions
     public DbSet<RewardPoints> RewardPoints { get; set; } = null!;
@@ -47,39 +49,47 @@ public class RewardDbContext : DbContext
             entity.HasKey(u => u.Id);
 
             entity.Property(u => u.EmployeeId)
-                   .HasConversion(
-                       eid => eid.Value,        // Store the string in DB
-                       str => new EmployeeId(str) // Convert back to value object
-                   )
-                   .IsRequired()
-                   .HasMaxLength(50);
+                .HasConversion(
+                    eid => eid.Value,
+                    str => new EmployeeId(str)
+                )
+                .IsRequired()
+                .HasMaxLength(50);
 
-            entity.HasIndex(u => u.EmployeeId).IsUnique();
+            entity.HasIndex(u => u.EmployeeId)
+                .IsUnique();
 
             entity.Property(u => u.FirstName)
-                  .IsRequired()
-                  .HasMaxLength(100);
+                .IsRequired()
+                .HasMaxLength(100);
 
             entity.Property(u => u.LastName)
-                  .IsRequired()
-                  .HasMaxLength(100);
+                .IsRequired()
+                .HasMaxLength(100);
 
             entity.Property(u => u.Email)
-                  .HasConversion(
-                      e => e.Value,            // Store string in DB
-                      str => new Email(str)    // Convert back to Email VO
-                  )
-                  .IsRequired()
-                  .HasMaxLength(255);
+                .HasConversion(
+                    e => e.Value,
+                    str => new Email(str) // Convert back to Email VO
+                )
+                .IsRequired()
+                .HasMaxLength(255);
 
-            entity.HasIndex(u => u.Email).IsUnique();
+            entity.HasIndex(u => u.Email)
+                .IsUnique();
 
-            // Role stored as int
-            entity.Property(u => u.Role)
-                  .HasConversion<int>()
-                  .IsRequired();
+            // One-to-one relation with UserAccount
+            entity.HasOne(u => u.Account)
+                .WithOne(a => a.User)
+                .HasForeignKey<UserAccount>(a => a.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
 
-            // One-to-one relation configured on UserAccount side (FK: UserAccount.UserId)
+            // One-to-many (User → UserRoles)
+            entity.HasMany(u => u.Roles)
+                .WithOne(ur => ur.User)
+                .HasForeignKey(ur => ur.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
+
             entity.Navigation(u => u.Account).AutoInclude(false);
         });
 
@@ -126,6 +136,42 @@ public class RewardDbContext : DbContext
 
             entity.Metadata.FindNavigation(nameof(UserAccount.Transactions))
                   ?.SetField("_transactions");
+        });
+
+        // ====================
+        // Role
+        // ====================
+        modelBuilder.Entity<Role>(entity =>
+        {
+            entity.ToTable("Roles");
+
+            entity.HasKey(r => r.Id);
+
+            entity.Property(r => r.Name)
+                .IsRequired()
+                .HasMaxLength(100);
+
+            entity.HasIndex(r => r.Name)
+                .IsUnique();
+        });
+
+        // ====================
+        // UserRole
+        // ====================
+        modelBuilder.Entity<UserRole>(entity =>
+        {
+            entity.ToTable("UserRoles");
+
+            entity.HasKey(ur => new { ur.UserId, ur.RoleId });
+
+            entity.HasOne(ur => ur.User)
+                .WithMany(u => u.Roles)
+                .HasForeignKey(ur => ur.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            entity.HasOne(ur => ur.Role)
+                .WithMany()
+                .HasForeignKey(ur => ur.RoleId);
         });
 
         // ====================

@@ -1,6 +1,5 @@
 ﻿using Application.Interfaces;
 using Domain.Entities.User;
-using Domain.Enums;
 using Domain.Exceptions;
 using Domain.ValueObjects;
 
@@ -9,10 +8,12 @@ namespace Application.Services;
 public class UserService(
     IUserRepository userRepository,
     IUserAccountRepository accountRepository,
+    IRoleRepository roleRepository,
     IPasswordHasher passwordHasher) : IUserService
 {
     private readonly IUserRepository _userRepository = userRepository;
     private readonly IUserAccountRepository _accountRepository = accountRepository;
+    private readonly IRoleRepository _roleRepository = roleRepository;
     private readonly IPasswordHasher _passwordHasher = passwordHasher;
 
     public async Task<UserProfile> RegisterUserAsync(
@@ -20,7 +21,7 @@ public class UserService(
         string email,
         string firstName,
         string lastName,
-        UserRole role,
+        string role,
         string password)
     {
         // 1) Basic password check (you can make this stricter later)
@@ -43,7 +44,8 @@ public class UserService(
         }
 
         // 4) Validate role
-        if (!Enum.IsDefined(typeof(UserRole), role))
+        var roleEntity = await _roleRepository.GetByNameAsync(role);
+        if (roleEntity == null)
             throw new ArgumentException($"Invalid role: {role}", nameof(role));
 
         // 5) Create aggregate root – Id is generated INSIDE the entity
@@ -51,9 +53,11 @@ public class UserService(
             employee,
             userEmail,
             firstName,
-            lastName,
-            role
+            lastName
         );
+
+        // ✅ Assign role via aggregate root (DDD rule)
+        profile.AssignRole(roleEntity);
 
         // 6) Create account with credentials
         var account = new UserAccount(profile.Id);

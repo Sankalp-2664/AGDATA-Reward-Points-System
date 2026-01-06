@@ -1,10 +1,8 @@
 ﻿using Api.Server.DTOs.Event;
 using Api.Server.Services;
-using Application.Interfaces;
-using AutoMapper;
-using Domain.Entities.Event;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 
 namespace Api.Server.Controllers;
 
@@ -187,4 +185,18 @@ public class EventController(
             return StatusCode(500, new { message = "An error occurred while adding the reward rule." });
         }
     }
+
+    [Authorize]
+    [HttpPost("{eventInstanceId}/participate")]
+    public async Task<IActionResult> Participate(Guid eventInstanceId)
+    {
+        var userId = Guid.Parse(
+            User.FindFirstValue(ClaimTypes.NameIdentifier)!
+        );
+
+        await _eventApiService.ParticipateAsync(eventInstanceId, userId);
+
+        return Ok("Participation successful.");
+    }
+
 }

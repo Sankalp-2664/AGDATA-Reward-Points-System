@@ -10,4 +10,5 @@ public interface IEventService
     Task<EventDefinition> UpdateEventAsync(EventDefinition definition);
     Task AddRewardRuleAsync(Guid eventId, int rank, Guid rewardPointsId);
     Task AssignWinnerAsync(Guid eventInstanceId, Guid userId, int rank);
+    Task ParticipateAsync(Guid eventInstanceId, Guid userId);
 }

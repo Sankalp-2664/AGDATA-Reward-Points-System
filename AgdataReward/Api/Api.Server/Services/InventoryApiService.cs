@@ -18,6 +18,11 @@ public interface IInventoryApiService
         Guid productId,
         int quantityChange,
         CancellationToken cancellationToken = default);
+
+    Task UpdateStatusAsync(
+        Guid productId,
+        bool isActive,
+        CancellationToken cancellationToken = default);
 }
 
 public class InventoryApiService(
@@ -43,5 +48,13 @@ public class InventoryApiService(
         CancellationToken cancellationToken = default)
     {
         await _inventoryService.UpdateStockAsync(productId, quantityChange);
+    }
+
+    public async Task UpdateStatusAsync(
+        Guid productId,
+        bool isActive,
+        CancellationToken cancellationToken = default)
+    {
+        await _inventoryService.UpdateStatusAsync(productId, isActive);
     }
 }

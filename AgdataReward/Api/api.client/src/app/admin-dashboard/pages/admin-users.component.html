@@ -1,0 +1,247 @@
+<div class="admin-users-container">
+  <div class="page-header">
+    <h2>User Management</h2>
+    <button class="btn-primary" (click)="openCreateModal()">
+      + Add New User
+    </button>
+  </div>
+
+  <!-- Filters Section -->
+  <div class="filters-section">
+    <app-search-filter
+      [placeholder]="'Search users by name, email, or employee ID...'"
+      [(searchQuery)]="searchQuery"
+      (search)="onSearch($event)"
+    ></app-search-filter>
+
+    <div class="filter-row">
+      <div class="filter-group">
+        <label class="filter-label">Status:</label>
+        <select 
+          [(ngModel)]="selectedStatus" 
+          (ngModelChange)="onStatusChange($event)"
+          class="filter-select"
+        >
+          <option *ngFor="let status of statusOptions" [value]="status">
+            {{ status }}
+          </option>
+        </select>
+      </div>
+
+      <div class="filter-group">
+        <label class="filter-label">Role:</label>
+        <select 
+          [(ngModel)]="selectedRole" 
+          (ngModelChange)="onRoleChange($event)"
+          class="filter-select"
+        >
+          <option *ngFor="let role of roleOptions" [value]="role">
+            {{ role }}
+          </option>
+        </select>
+      </div>
+
+      <button class="btn-secondary" (click)="clearFilters()">
+        Clear Filters
+      </button>
+    </div>
+  </div>
+
+  <!-- Results Count -->
+  <div class="results-info">
+    Showing {{ filteredUsers.length }} of {{ users.length }} users
+  </div>
+
+  <!-- Users Table -->
+  <div class="table-container">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Employee ID</th>
+          <th>Name</th>
+          <th>Email</th>
+          <th>Department</th>
+          <th>Role</th>
+          <th>Points Balance</th>
+          <th>Status</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let user of filteredUsers">
+          <td class="font-semibold">{{ user.employeeId }}</td>
+          <td>{{ user.firstName }} {{ user.lastName }}</td>
+          <td>{{ user.email }}</td>
+          <td>
+            <span class="department-badge">{{ user.department || 'N/A' }}</span>
+          </td>
+          <td>
+            <span class="role-badge" [ngClass]="getUserRoleBadgeClass(user.role)">
+              {{ user.role }}
+            </span>
+          </td>
+          <td class="points-cell">
+            <span>{{ user.account.rewardBalance }} pts</span>
+            <button class="btn-mini" (click)="openPointsModal(user)">Adjust</button>
+          </td>
+          <td>
+            <span class="badge" [ngClass]="getUserStatusClass(user.account.status)">
+              {{ user.account.status }}
+            </span>
+          </td>
+          <td>
+            <div class="action-buttons">
+              <button class="btn-icon btn-edit" (click)="openEditModal(user)" title="Edit">
+                ✏️
+              </button>
+              <button 
+                class="btn-icon" 
+                [class.btn-activate]="user.account.status !== 'Active'"
+                [class.btn-deactivate]="user.account.status === 'Active'"
+                (click)="toggleUserStatus(user)" 
+                [title]="user.account.status === 'Active' ? 'Deactivate' : 'Activate'"
+              >
+                {{ user.account.status === 'Active' ? '🔒' : '🔓' }}
+              </button>
+            </div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div *ngIf="filteredUsers.length === 0" class="empty-state">
+      <p>No users found</p>
+      <button class="btn-primary" (click)="clearFilters()">Clear Filters</button>
+    </div>
+  </div>
+
+  <!-- Create/Edit User Modal -->
+  <div class="modal-overlay" *ngIf="showModal" (click)="closeModal()">
+    <div class="modal-content" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h3>{{ modalMode === 'create' ? 'Add New User' : 'Edit User' }}</h3>
+        <button class="modal-close" (click)="closeModal()">×</button>
+      </div>
+      
+      <div class="modal-body">
+        <form>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Employee ID *</label>
+              <input type="text" [(ngModel)]="userForm.employeeId" name="employeeId" required />
+            </div>
+            
+            <div class="form-group">
+              <label>Email *</label>
+              <input type="email" [(ngModel)]="userForm.email" name="email" required />
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label>First Name *</label>
+              <input type="text" [(ngModel)]="userForm.firstName" name="firstName" required />
+            </div>
+            
+            <div class="form-group">
+              <label>Last Name *</label>
+              <input type="text" [(ngModel)]="userForm.lastName" name="lastName" required />
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label>Department</label>
+              <input type="text" [(ngModel)]="userForm.department" name="department" />
+            </div>
+            
+            <div class="form-group">
+              <label>Phone</label>
+              <input type="tel" [(ngModel)]="userForm.phone" name="phone" />
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label>Role *</label>
+              <select [(ngModel)]="userForm.role" name="role" required>
+                <option [value]="'User'">User</option>
+                <option [value]="'Admin'">Admin</option>
+              </select>
+            </div>
+          </div>
+        </form>
+      </div>
+
+      <div class="modal-footer">
+        <button class="btn-secondary" (click)="closeModal()">Cancel</button>
+        <button class="btn-primary" (click)="saveUser()">
+          {{ modalMode === 'create' ? 'Create User' : 'Update User' }}
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Points Adjustment Modal -->
+  <div class="modal-overlay" *ngIf="showPointsModal" (click)="closePointsModal()">
+    <div class="modal-content modal-small" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h3>Adjust Points</h3>
+        <button class="modal-close" (click)="closePointsModal()">×</button>
+      </div>
+      
+      <div class="modal-body">
+        <div class="user-info-card">
+          <p><strong>User:</strong> {{ selectedUser?.firstName }} {{ selectedUser?.lastName }}</p>
+          <p><strong>Current Balance:</strong> {{ selectedUser?.account.rewardBalance }} points</p>
+        </div>
+
+        <form>
+          <div class="form-group">
+            <label>Adjustment Type *</label>
+            <div class="radio-group">
+              <label class="radio-label">
+                <input type="radio" [(ngModel)]="pointsAdjustment.type" name="type" value="add" />
+                <span>Add Points</span>
+              </label>
+              <label class="radio-label">
+                <input type="radio" [(ngModel)]="pointsAdjustment.type" name="type" value="deduct" />
+                <span>Deduct Points</span>
+              </label>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label>Points Amount *</label>
+            <input 
+              type="number" 
+              [(ngModel)]="pointsAdjustment.points" 
+              name="points" 
+              min="0" 
+              required 
+              placeholder="Enter points amount"
+            />
+          </div>
+
+          <div class="form-group">
+            <label>Reason *</label>
+            <textarea 
+              [(ngModel)]="pointsAdjustment.reason" 
+              name="reason" 
+              rows="3" 
+              required
+              placeholder="Explain why you're adjusting points..."
+            ></textarea>
+          </div>
+        </form>
+      </div>
+
+      <div class="modal-footer">
+        <button class="btn-secondary" (click)="closePointsModal()">Cancel</button>
+        <button class="btn-primary" (click)="adjustPoints()">
+          {{ pointsAdjustment.type === 'add' ? 'Add' : 'Deduct' }} Points
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

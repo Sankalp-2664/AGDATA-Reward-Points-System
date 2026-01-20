@@ -1,0 +1,35 @@
+<div *ngIf="isOpen" class="modal-overlay" (click)="onClose()">
+  <div class="modal-content small" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h3>Update Stock</h3>
+      <button class="modal-close" (click)="onClose()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group">
+        <label>Product ID</label>
+        <input type="text" [value]="product?.productId" disabled />
+      </div>
+      <div class="form-group">
+        <label>Product Name</label>
+        <input type="text" [value]="product?.name" disabled />
+      </div>
+      <div class="form-group">
+        <label>Current Stock</label>
+        <input type="text" [value]="product?.stock" disabled />
+      </div>
+      <div class="form-group">
+        <label>New Stock Quantity *</label>
+        <input
+          type="number"
+          [(ngModel)]="newStock"
+          placeholder="Enter quantity"
+          min="0"
+        />
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-cancel" (click)="onClose()">Cancel</button>
+      <button class="btn-save" (click)="onSave()">Save</button>
+    </div>
+  </div>
+</div>

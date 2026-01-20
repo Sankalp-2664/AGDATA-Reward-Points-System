@@ -18,4 +18,10 @@ public class InMemoryRewardTransactionRepository : IRewardTransactionRepository
 
     public Task<IEnumerable<RewardTransaction>> GetByUserIdAsync(Guid userId)
         => Task.FromResult<IEnumerable<RewardTransaction>>(_transactions.Where(t => t.UserId == userId));
+
+    public Task<bool> HasTransactionsForEventAsync(Guid eventId)
+    {
+        var eventIdString = eventId.ToString();
+        return Task.FromResult(_transactions.Any(t => t.Notes.Contains(eventIdString)));
+    }
 }

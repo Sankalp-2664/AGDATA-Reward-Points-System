@@ -23,4 +23,7 @@ public class InMemoryEventInstanceRepository : IEventInstanceRepository
 
     public Task<IEnumerable<EventInstance>> ListAsync()
         => Task.FromResult<IEnumerable<EventInstance>>(_instances);
+
+    public Task<IEnumerable<EventInstance>> GetByEventIdAsync(Guid eventId)
+        => Task.FromResult<IEnumerable<EventInstance>>(_instances.Where(i => i.EventId == eventId).ToList());
 }

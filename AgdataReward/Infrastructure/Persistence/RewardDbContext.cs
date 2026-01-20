@@ -241,6 +241,17 @@ public class RewardDbContext : DbContext
                   .IsRequired()
                   .HasMaxLength(200);
 
+            entity.Property(e => e.StartDate)
+                  .IsRequired();
+
+            entity.Property(e => e.EndDate)
+                  .IsRequired();
+
+            entity.Property(e => e.Status)
+                  .IsRequired()
+                  .HasMaxLength(50)
+                  .HasDefaultValue("Upcoming");
+
             entity.Navigation(e => e.Instances).UsePropertyAccessMode(PropertyAccessMode.Field);
             entity.Navigation(e => e.RewardRules).UsePropertyAccessMode(PropertyAccessMode.Field);
         });

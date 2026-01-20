@@ -22,4 +22,19 @@ public class ProductInformation
         Name = !string.IsNullOrWhiteSpace(name) ? name : throw new ArgumentException("Product name is required.");
         RewardPointsId = rewardPointsId != Guid.Empty ? rewardPointsId : throw new ArgumentException("RewardPointsId cannot be empty.");
     }
+
+    public void UpdateName(string name)
+    {
+        Name = !string.IsNullOrWhiteSpace(name) ? name : throw new ArgumentException("Product name is required.");
+    }
+
+    public void UpdateSKU(SKU sku)
+    {
+        SKU = sku ?? throw new ArgumentNullException(nameof(sku), "SKU is required.");
+    }
+
+    public void UpdateRewardPoints(Guid rewardPointsId)
+    {
+        RewardPointsId = rewardPointsId != Guid.Empty ? rewardPointsId : throw new ArgumentException("RewardPointsId cannot be empty.");
+    }
 }

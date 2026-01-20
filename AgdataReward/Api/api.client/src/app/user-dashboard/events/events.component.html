@@ -1,0 +1,104 @@
+<div class="events-shell">
+  <!-- Main Content -->
+  <main class="content">
+    <!-- Filters Section -->
+    <div class="filters-section">
+      <div class="search-filter-container">
+        <input 
+          type="text" 
+          class="search-input"
+          [(ngModel)]="searchQuery"
+          (ngModelChange)="onSearch($event)"
+          placeholder="Search events by name, code, or description..."
+        />
+        <div class="filter-dropdown-container">
+          <button class="filter-button" (click)="toggleFilterDropdown()">
+            <span>Status Filter</span>
+            <span class="filter-icon">{{ filterDropdownOpen ? '▲' : '▼' }}</span>
+          </button>
+          <div class="filter-dropdown" *ngIf="filterDropdownOpen">
+            <div class="filter-option" 
+                 *ngFor="let status of statusOptions" 
+                 (click)="selectStatus(status)"
+                 [class.active]="selectedStatus === status">
+              {{ status }}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Results Count -->
+    <div class="results-info" *ngIf="filteredEvents.length > 0">
+      <span>Showing {{ filteredEvents.length }} of {{ events.length }} events</span>
+    </div>
+
+    <!-- Events Grid -->
+    <section class="events-grid">
+      <article *ngFor="let event of filteredEvents" class="event-card">
+        <div class="event-header">
+          <h3 class="event-name">{{ event.name }}</h3>
+          <div class="event-status-badge" [ngClass]="getEventStatusBadgeClass(event.status)">
+            {{ event.status }}
+          </div>
+        </div>
+        
+        <div class="event-body">
+          <div class="event-info-row">
+            <span class="info-label">Event Code:</span>
+            <span class="info-value">{{ event.eventId }}</span>
+          </div>
+          <div class="event-info-row">
+            <span class="info-label">Start Date:</span>
+            <span class="info-value">{{ event.startDate | date:'mediumDate' }}</span>
+          </div>
+          <div class="event-info-row">
+            <span class="info-label">End Date:</span>
+            <span class="info-value">{{ event.endDate | date:'mediumDate' }}</span>
+          </div>
+          <div class="event-info-row">
+            <span class="info-label">Participants:</span>
+            <span class="info-value">{{ event.participantCount || 0 }}</span>
+          </div>
+          <div class="event-description" *ngIf="event.description">
+            {{ event.description }}
+          </div>
+          
+          <div class="prizes-section">
+            <div class="prize-row">
+              <span class="prize-label">1st Prize:</span>
+              <span class="prize-points">{{ event.firstPrize }} pts</span>
+            </div>
+            <div class="prize-row">
+              <span class="prize-label">2nd Prize:</span>
+              <span class="prize-points">{{ event.secondPrize }} pts</span>
+            </div>
+            <div class="prize-row">
+              <span class="prize-label">3rd Prize:</span>
+              <span class="prize-points">{{ event.thirdPrize }} pts</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="event-footer">
+          <button
+            class="participate-btn"
+            [class.disabled]="event.status !== 'Active' || isParticipated(event.id)"
+            [disabled]="event.status !== 'Active' || isParticipated(event.id)"
+            (click)="participateInEvent(event)"
+          >
+            {{ isParticipated(event.id) ? 'Already Participated' : 
+               (event.status === 'Active' ? 'Participate Now' : event.status) }}
+          </button>
+        </div>
+      </article>
+
+      <div *ngIf="filteredEvents.length === 0" class="empty-state">
+        <p>No events found matching your filters</p>
+        <button class="clear-filters-btn" (click)="clearFilters()">
+          Clear Filters
+        </button>
+      </div>
+    </section>
+  </main>
+</div>

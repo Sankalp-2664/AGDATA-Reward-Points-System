@@ -8,4 +8,5 @@ public interface IEventInstanceRepository
     Task AddAsync(EventInstance instance);
     Task<IEnumerable<EventInstance>> ListAsync();
     Task UpdateAsync(EventInstance instance);
+    Task<IEnumerable<EventInstance>> GetByEventIdAsync(Guid eventId);
 }

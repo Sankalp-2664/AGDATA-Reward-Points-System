@@ -1,0 +1,130 @@
+@import './admin-events.component.css';
+
+/* Additional styles specific to users */
+.department-badge {
+  padding: 4px 10px;
+  background: #dbeafe;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 500;
+  color: #1e40af;
+}
+
+.role-badge {
+  padding: 4px 10px;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.role-admin {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.role-user {
+  background: #e0e7ff;
+  color: #3730a3;
+}
+
+.badge-suspended {
+  background: #fed7aa;
+  color: #9a3412;
+}
+
+.btn-activate {
+  background: #d1fae5 !important;
+}
+
+.btn-activate:hover {
+  background: #a7f3d0 !important;
+}
+
+.btn-deactivate {
+  background: #fee2e2 !important;
+}
+
+.btn-deactivate:hover {
+  background: #fecaca !important;
+}
+
+.modal-small {
+  max-width: 500px;
+}
+
+.user-info-card {
+  background: #f9fafb;
+  padding: 16px;
+  border-radius: 8px;
+  margin-bottom: 20px;
+}
+
+.user-info-card p {
+  margin: 8px 0;
+  font-size: 14px;
+  color: #374151;
+}
+
+.user-info-card strong {
+  color: #1f2937;
+}
+
+.radio-group {
+  display: flex;
+  gap: 16px;
+  margin-top: 8px;
+}
+
+.radio-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  padding: 8px 12px;
+  border: 2px solid #e5e7eb;
+  border-radius: 8px;
+  transition: all 0.2s;
+}
+
+.radio-label:hover {
+  border-color: #3b82f6;
+  background: #f9fafb;
+}
+
+.radio-label input[type="radio"] {
+  cursor: pointer;
+}
+
+.radio-label input[type="radio"]:checked + span {
+  color: #3b82f6;
+  font-weight: 600;
+}
+
+.filter-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.filter-label {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #374151;
+}
+
+.filter-select {
+  padding: 0.625rem 0.75rem;
+  border: 1px solid #e5e7eb;
+  border-radius: 0.5rem;
+  font-size: 0.875rem;
+  outline: none;
+  transition: all 0.2s;
+  min-width: 150px;
+  background: white;
+}
+
+.filter-select:focus {
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}

@@ -13,7 +13,19 @@ public class InMemoryRewardPointsRepository : IRewardPointsRepository
         return Task.FromResult(points);
     }
 
+    public Task<RewardPoints?> GetByValueAsync(int pointsValue)
+    {
+        var points = _rewardPoints.Values.FirstOrDefault(rp => rp.PointsValue == pointsValue);
+        return Task.FromResult(points);
+    }
+
     public Task AddAsync(RewardPoints rewardPoints)
+    {
+        _rewardPoints[rewardPoints.Id] = rewardPoints;
+        return Task.CompletedTask;
+    }
+
+    public Task UpdateAsync(RewardPoints rewardPoints)
     {
         _rewardPoints[rewardPoints.Id] = rewardPoints;
         return Task.CompletedTask;
@@ -23,5 +35,4 @@ public class InMemoryRewardPointsRepository : IRewardPointsRepository
     {
         return await Task.FromResult(_rewardPoints.Values.ToList());
     }
-
 }

@@ -1,0 +1,24 @@
+<div *ngIf="isOpen" class="modal-overlay" (click)="onClose()">
+  <div class="modal-content" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h3>Reject Request</h3>
+      <button class="modal-close" (click)="onClose()">✕</button>
+    </div>
+    <div class="modal-body">
+      <p><strong>Employee:</strong> {{ request?.name }}</p>
+      <p><strong>Product:</strong> {{ request?.product }}</p>
+      <div class="form-group">
+        <label>Reason for Rejection *</label>
+        <textarea
+          [(ngModel)]="rejectReason"
+          placeholder="Please provide a reason..."
+          rows="4"
+        ></textarea>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-cancel" (click)="onClose()">Cancel</button>
+      <button class="btn-reject" (click)="onReject()">Reject Request</button>
+    </div>
+  </div>
+</div>

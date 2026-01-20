@@ -30,7 +30,9 @@ public class MappingProfile : Profile
             .ConstructUsing(dto => new EventDefinition(
                 Guid.NewGuid(),
                 dto.Code,
-                dto.Title));
+                dto.Title,
+                dto.StartDate,
+                dto.EndDate));
 
         CreateMap<EventDefinitionUpdateDto, EventDefinition>()
             .ForAllMembers(opt => opt.Condition((src, dest, srcMember) => srcMember != null));

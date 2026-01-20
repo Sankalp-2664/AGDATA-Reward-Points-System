@@ -1,0 +1,215 @@
+:root {
+  /* ==================== COLOR PALETTE ==================== */
+  /* Primary Green (AgData Brand) */
+  --ag-color-primary-dark: #1b5e20;
+  --ag-color-primary: #2e7d32;
+  --ag-color-primary-light: #4caf50;
+  --ag-color-primary-lighter: #81c784;
+  --ag-color-primary-lightest: #c8e6c9;
+
+  /* Success States */
+  --ag-color-success: #4caf50;
+  --ag-color-success-light: #81c784;
+  --ag-color-success-lightest: #e8f5e9;
+
+  /* Error & Debit */
+  --ag-color-error: #d32f2f;
+  --ag-color-error-light: #ef5350;
+  --ag-color-error-lightest: #ffebee;
+
+  /* Neutral */
+  --ag-color-warning: #f57c00;
+  --ag-color-warning-light: #ffb74d;
+  --ag-color-warning-lightest: #fff3e0;
+
+  /* Grays */
+  --ag-color-gray-dark: #212121;
+  --ag-color-gray-600: #424242;
+  --ag-color-gray-500: #616161;
+  --ag-color-gray-400: #757575;
+  --ag-color-gray-300: #9e9e9e;
+  --ag-color-gray-200: #bdbdbd;
+  --ag-color-gray-100: #e0e0e0;
+  --ag-color-gray-50: #f5f5f5;
+  --ag-color-gray-light: #fafafa;
+
+  /* Whites & Transparency */
+  --ag-color-white: #ffffff;
+  --ag-color-black: #000000;
+  --ag-color-overlay: rgba(0, 0, 0, 0.5);
+  --ag-color-overlay-light: rgba(0, 0, 0, 0.12);
+
+  /* ==================== TYPOGRAPHY ==================== */
+  --ag-font-family: 'Roboto', sans-serif;
+  --ag-font-family-mono: 'Roboto Mono', monospace;
+
+  /* Headings */
+  --ag-heading-01: 700 42px/1.2 var(--ag-font-family);
+  --ag-heading-02: 500 32px/1.3 var(--ag-font-family);
+  --ag-heading-03: 500 28px/1.3 var(--ag-font-family);
+  --ag-heading-04: 500 20px/1.4 var(--ag-font-family);
+  --ag-heading-05: 500 16px/1.5 var(--ag-font-family);
+  --ag-heading-06: 500 14px/1.5 var(--ag-font-family);
+
+  /* Subtitles */
+  --ag-subtitle-01: 400 16px/1.5 var(--ag-font-family);
+  --ag-subtitle-02: 400 14px/1.5 var(--ag-font-family);
+
+  /* Body */
+  --ag-body-01: 400 16px/1.5 var(--ag-font-family);
+  --ag-body-02: 700 16px/1.5 var(--ag-font-family);
+  --ag-body-03: 400 16px/1.5 var(--ag-font-family);
+  --ag-body-04: 400 14px/1.5 var(--ag-font-family);
+
+  /* Utility / Labels */
+  --ag-label: 500 12px/1.5 var(--ag-font-family);
+  --ag-helper-text: 400 12px/1.4 var(--ag-font-family);
+  --ag-legal: 400 11px/1.4 var(--ag-font-family);
+  --ag-button-text: 500 14px/1.5 var(--ag-font-family);
+
+  /* ==================== SPACING ==================== */
+  --ag-spacing-xs: 4px;
+  --ag-spacing-sm: 8px;
+  --ag-spacing-md: 16px;
+  --ag-spacing-lg: 24px;
+  --ag-spacing-xl: 32px;
+  --ag-spacing-2xl: 48px;
+
+  /* ==================== BORDER RADIUS ==================== */
+  --ag-radius-xs: 2px;
+  --ag-radius-sm: 4px;
+  --ag-radius-md: 8px;
+  --ag-radius-lg: 12px;
+  --ag-radius-xl: 16px;
+  --ag-radius-full: 9999px;
+
+  /* ==================== SHADOWS ==================== */
+  --ag-shadow-xs: 0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.24);
+  --ag-shadow-sm: 0 3px 6px rgba(0, 0, 0, 0.15), 0 2px 4px rgba(0, 0, 0, 0.12);
+  --ag-shadow-md: 0 10px 20px rgba(0, 0, 0, 0.15), 0 3px 6px rgba(0, 0, 0, 0.1);
+  --ag-shadow-lg: 0 15px 35px rgba(0, 0, 0, 0.2), 0 5px 15px rgba(0, 0, 0, 0.1);
+  --ag-shadow-xl: 0 20px 40px rgba(0, 0, 0, 0.3);
+
+  /* ==================== TRANSITIONS ==================== */
+  --ag-transition-fast: 150ms ease-in-out;
+  --ag-transition-base: 200ms ease-in-out;
+  --ag-transition-slow: 300ms ease-in-out;
+
+  /* ==================== BREAKPOINTS ==================== */
+  --ag-breakpoint-xs: 320px;
+  --ag-breakpoint-sm: 480px;
+  --ag-breakpoint-md: 768px;
+  --ag-breakpoint-lg: 1024px;
+  --ag-breakpoint-xl: 1280px;
+  --ag-breakpoint-2xl: 1536px;
+
+  /* ==================== Z-INDEX ==================== */
+  --ag-z-dropdown: 1000;
+  --ag-z-sticky: 1020;
+  --ag-z-fixed: 1030;
+  --ag-z-modal-backdrop: 1040;
+  --ag-z-modal: 1050;
+  --ag-z-tooltip: 1070;
+}
+
+/* ==================== GLOBAL STYLES ==================== */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html {
+  font-size: 16px;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  font-family: var(--ag-font-family);
+  background-color: var(--ag-color-gray-50);
+  color: var(--ag-color-gray-dark);
+  line-height: 1.5;
+  min-height: 100vh;
+}
+
+/* ==================== TYPOGRAPHY CLASSES ==================== */
+.ag-heading-01 { font: var(--ag-heading-01); }
+.ag-heading-02 { font: var(--ag-heading-02); }
+.ag-heading-03 { font: var(--ag-heading-03); }
+.ag-heading-04 { font: var(--ag-heading-04); }
+.ag-heading-05 { font: var(--ag-heading-05); }
+.ag-heading-06 { font: var(--ag-heading-06); }
+
+.ag-subtitle-01 { font: var(--ag-subtitle-01); }
+.ag-subtitle-02 { font: var(--ag-subtitle-02); }
+
+.ag-body-01 { font: var(--ag-body-01); }
+.ag-body-02 { font: var(--ag-body-02); }
+.ag-body-03 { font: var(--ag-body-03); }
+.ag-body-04 { font: var(--ag-body-04); }
+
+.ag-label { font: var(--ag-label); }
+.ag-helper-text { font: var(--ag-helper-text); }
+.ag-legal { font: var(--ag-legal); }
+.ag-button-text { font: var(--ag-button-text); }
+
+/* ==================== UTILITY CLASSES ==================== */
+.ag-text-primary { color: var(--ag-color-primary); }
+.ag-text-success { color: var(--ag-color-success); }
+.ag-text-error { color: var(--ag-color-error); }
+.ag-text-warning { color: var(--ag-color-warning); }
+.ag-text-gray { color: var(--ag-color-gray-500); }
+.ag-text-dark { color: var(--ag-color-gray-dark); }
+
+/* Flexbox utilities */
+.ag-flex { display: flex; }
+.ag-flex-center { display: flex; align-items: center; justify-content: center; }
+.ag-flex-between { display: flex; align-items: center; justify-content: space-between; }
+.ag-flex-col { display: flex; flex-direction: column; }
+.ag-flex-gap { gap: var(--ag-spacing-md); }
+
+/* Spacing utilities */
+.ag-mt { margin-top: var(--ag-spacing-md); }
+.ag-mb { margin-bottom: var(--ag-spacing-md); }
+.ag-ml { margin-left: var(--ag-spacing-md); }
+.ag-mr { margin-right: var(--ag-spacing-md); }
+.ag-p { padding: var(--ag-spacing-md); }
+
+/* ==================== ACCESSIBILITY ==================== */
+.ag-sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
+}
+
+/* Focus visible for keyboard navigation */
+*:focus-visible {
+  outline: 2px solid var(--ag-color-primary);
+  outline-offset: 2px;
+}
+
+/* ==================== SCROLLBAR STYLING ==================== */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--ag-color-gray-100);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--ag-color-gray-300);
+  border-radius: var(--ag-radius-md);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--ag-color-gray-400);
+}

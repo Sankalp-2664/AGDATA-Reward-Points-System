@@ -1,0 +1,30 @@
+<div class="user-shell">
+  <!-- Topbar -->
+  <header class="topbar">
+    <div class="brand">
+      <div class="brand-logo">
+        <img
+          src="assets/images/agdata-logo.png"
+          alt="AGDATA Logo"
+          class="agdata-logo"
+        />
+        <div class="system">Reward System</div>
+      </div>
+    </div>
+    <nav class="nav">
+      <a class="nav-item" (click)="navigateToHome()"> Home </a>
+      <a class="nav-item" (click)="navigateToEvents()"> Events </a>
+      <a class="nav-item" (click)="navigateToProducts()"> Products </a>
+      <a class="nav-item" (click)="navigateToRewards()"> My Rewards </a>
+      <a class="nav-item" *ngIf="isAdmin" (click)="navigateToAdmin()">
+        Admin
+      </a>
+      <a class="nav-item" (click)="navigateToProfile()"> Profile </a>
+    </nav>
+  </header>
+
+  <!-- ✅ Child pages will load here -->
+  <main class="content">
+    <router-outlet></router-outlet>
+  </main>
+</div>

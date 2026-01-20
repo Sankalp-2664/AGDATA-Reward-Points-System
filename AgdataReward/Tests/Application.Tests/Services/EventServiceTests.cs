@@ -10,6 +10,10 @@ namespace Tests.Application.Tests.Services;
 
 public class EventServiceTests
 {
+    // Default dates for testing
+    private static readonly DateTime DefaultStartDate = new(2026, 1, 1);
+    private static readonly DateTime DefaultEndDate = new(2026, 12, 31);
+
     private EventService BuildService(
         out InMemoryEventDefinitionRepository defRepo,
         out InMemoryEventRewardRuleRepository ruleRepo,
@@ -32,7 +36,7 @@ public class EventServiceTests
     {
         var service = BuildService(out var defRepo, out var ruleRepo, out var instRepo, out var accRepo, out var txRepo, out var ptsRepo);
 
-        var ev = await service.CreateEventAsync("CODE1", "Title 1");
+        var ev = await service.CreateEventAsync("CODE1", "Title 1", DefaultStartDate, DefaultEndDate);
 
         Assert.NotNull(ev);
         Assert.Equal("CODE1", ev.Code);
@@ -51,7 +55,7 @@ public class EventServiceTests
         var service = BuildService(out var defRepo, out var ruleRepo, out var instRepo, out var accRepo, out var txRepo, out var ptsRepo);
 
         await Assert.ThrowsAsync<ArgumentException>(() =>
-            service.CreateEventAsync(code, "Some Title"));
+            service.CreateEventAsync(code, "Some Title", DefaultStartDate, DefaultEndDate));
     }
 
     [Theory]
@@ -63,7 +67,7 @@ public class EventServiceTests
         var service = BuildService(out var defRepo, out var ruleRepo, out var instRepo, out var accRepo, out var txRepo, out var ptsRepo);
 
         await Assert.ThrowsAsync<ArgumentException>(() =>
-            service.CreateEventAsync("CODEX", title));
+            service.CreateEventAsync("CODEX", title, DefaultStartDate, DefaultEndDate));
     }
 
     [Fact]
@@ -80,8 +84,8 @@ public class EventServiceTests
     {
         var service = BuildService(out var defRepo, out var ruleRepo, out var instRepo, out var accRepo, out var txRepo, out var ptsRepo);
 
-        var e1 = await service.CreateEventAsync("C1", "Title1");
-        var e2 = await service.CreateEventAsync("C2", "Title2");
+        var e1 = await service.CreateEventAsync("C1", "Title1", DefaultStartDate, DefaultEndDate);
+        var e2 = await service.CreateEventAsync("C2", "Title2", DefaultStartDate, DefaultEndDate);
 
         var list = await service.ListEventsAsync();
         Assert.Equal(2, list.Count());
@@ -96,7 +100,7 @@ public class EventServiceTests
         var userAccount = new UserAccount(userId);
         await accRepo.AddAsync(userAccount);
 
-        var ev = await service.CreateEventAsync("E1", "Ev 1");
+        var ev = await service.CreateEventAsync("E1", "Ev 1", DefaultStartDate, DefaultEndDate);
         var rp = new RewardPoints(Guid.NewGuid(), 150);
         await ptsRepo.AddAsync(rp);
         await service.AddRewardRuleAsync(ev.Id, rank: 1, rewardPointsId: rp.Id);
@@ -128,7 +132,7 @@ public class EventServiceTests
     {
         var service = BuildService(out var defRepo, out var ruleRepo, out var instRepo, out var accRepo, out var txRepo, out var ptsRepo);
 
-        var ev = await service.CreateEventAsync("EV2", "Event2");
+        var ev = await service.CreateEventAsync("EV2", "Event2", DefaultStartDate, DefaultEndDate);
         var rp = new RewardPoints(Guid.NewGuid(), 200);
         await ptsRepo.AddAsync(rp);
 
@@ -147,7 +151,7 @@ public class EventServiceTests
     {
         var service = BuildService(out var defRepo, out var ruleRepo, out var instRepo, out var accRepo, out var txRepo, out var ptsRepo);
 
-        var ev = await service.CreateEventAsync("EV3", "Event3");
+        var ev = await service.CreateEventAsync("EV3", "Event3", DefaultStartDate, DefaultEndDate);
         await service.AddRewardRuleAsync(ev.Id, 1, Guid.NewGuid());
 
         var inst = new EventInstance(Guid.NewGuid(), ev.Id);
@@ -165,7 +169,7 @@ public class EventServiceTests
     {
         var service = BuildService(out var defRepo, out var ruleRepo, out var instRepo, out var accRepo, out var txRepo, out var ptsRepo);
 
-        var ev = await service.CreateEventAsync("EV4", "Event4");
+        var ev = await service.CreateEventAsync("EV4", "Event4", DefaultStartDate, DefaultEndDate);
         var rp = new RewardPoints(Guid.NewGuid(), 300);
         await ptsRepo.AddAsync(rp);
         await service.AddRewardRuleAsync(ev.Id, 1, rp.Id);
@@ -182,7 +186,7 @@ public class EventServiceTests
     {
         var service = BuildService(out var defRepo, out var ruleRepo, out var instRepo, out var accRepo, out var txRepo, out var ptsRepo);
 
-        var ev = await service.CreateEventAsync("EV5", "Event5");
+        var ev = await service.CreateEventAsync("EV5", "Event5", DefaultStartDate, DefaultEndDate);
         var rp = new RewardPoints(Guid.NewGuid(), 100);
         await ptsRepo.AddAsync(rp);
         await service.AddRewardRuleAsync(ev.Id, 1, rp.Id);
@@ -202,7 +206,7 @@ public class EventServiceTests
     {
         var service = BuildService(out var defRepo, out var ruleRepo, out var instRepo, out var accRepo, out var txRepo, out var ptsRepo);
 
-        var ev = await service.CreateEventAsync("EV6", "Event6");
+        var ev = await service.CreateEventAsync("EV6", "Event6", DefaultStartDate, DefaultEndDate);
         var rp1 = new RewardPoints(Guid.NewGuid(), 50);
         var rp2 = new RewardPoints(Guid.NewGuid(), 30);
         await ptsRepo.AddAsync(rp1);
@@ -232,7 +236,7 @@ public class EventServiceTests
     {
         var service = BuildService(out var defRepo, out var ruleRepo, out var instRepo, out var accRepo, out var txRepo, out var ptsRepo);
 
-        var ev = await service.CreateEventAsync("  CODETRIM  ", "  Title Trim  ");
+        var ev = await service.CreateEventAsync("  CODETRIM  ", "  Title Trim  ", DefaultStartDate, DefaultEndDate);
 
         Assert.Equal("CODETRIM", ev.Code);
         Assert.Equal("Title Trim", ev.Title);
@@ -245,11 +249,11 @@ public class EventServiceTests
         out var defRepo, out var ruleRepo, out var instRepo,
         out var accRepo, out var txRepo, out var ptsRepo);
 
-        await service.CreateEventAsync("DUPCODE", "Title 1");
+        await service.CreateEventAsync("DUPCODE", "Title 1", DefaultStartDate, DefaultEndDate);
 
         // Act & Assert
         var ex = await Assert.ThrowsAsync<InvalidOperationException>(() =>
-            service.CreateEventAsync("DUPCODE", "Title 2"));
+            service.CreateEventAsync("DUPCODE", "Title 2", DefaultStartDate, DefaultEndDate));
 
         Assert.Equal("Duplicate event code not allowed", ex.Message);
     }
@@ -259,7 +263,7 @@ public class EventServiceTests
     {
         var service = BuildService(out var defRepo, out var ruleRepo, out var instRepo, out var accRepo, out var txRepo, out var ptsRepo);
 
-        var ev = await service.CreateEventAsync("EVLARGE", "Large Points Event");
+        var ev = await service.CreateEventAsync("EVLARGE", "Large Points Event", DefaultStartDate, DefaultEndDate);
         var largePoints = int.MaxValue;
         var rp = new RewardPoints(Guid.NewGuid(), largePoints);
         await ptsRepo.AddAsync(rp);

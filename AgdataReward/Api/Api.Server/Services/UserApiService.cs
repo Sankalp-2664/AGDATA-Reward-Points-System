@@ -11,8 +11,12 @@ namespace Api.Server.Services;
 public interface IUserApiService
 {
     Task<UserProfileDto?> GetUserByIdAsync(Guid id, CancellationToken cancellationToken = default);
+    Task<UserProfileDto?> GetCurrentUserAsync(string userId, CancellationToken cancellationToken = default);
     Task<UserProfileDto> RegisterUserAsync(UserProfileCreateDto dto, CancellationToken cancellationToken = default);
     Task<UserAccountDto?> GetUserAccountAsync(Guid id, CancellationToken cancellationToken = default);
+    Task<List<UserProfileDto>> GetAllUsersAsync(CancellationToken cancellationToken);
+    Task<UserProfileDto?> UpdateUserAsync(Guid id, UserProfileUpdateDto dto, CancellationToken cancellationToken = default);
+
 }
 
 public class UserApiService(
@@ -32,6 +36,26 @@ public class UserApiService(
             ? null
             : _mapper.Map<UserProfileDto>(user);
     }
+
+    public async Task<UserProfileDto?> GetCurrentUserAsync(
+        string userId,
+        CancellationToken cancellationToken = default)
+    {
+        if (Guid.TryParse(userId, out var guid))
+        {
+            var user = await _userService.GetUserByIdAsync(guid);
+            return user is null ? null : _mapper.Map<UserProfileDto>(user);
+        }
+        return null;
+    }
+
+    public async Task<List<UserProfileDto>> GetAllUsersAsync(CancellationToken cancellationToken)
+    {
+        var users = await _userService.GetAllUsersAsync(cancellationToken);
+
+        return _mapper.Map<List<UserProfileDto>>(users);
+    }
+
 
     public async Task<UserProfileDto> RegisterUserAsync(
         UserProfileCreateDto dto,
@@ -57,5 +81,23 @@ public class UserApiService(
         return account is null
             ? null
             : _mapper.Map<UserAccountDto>(account);
+    }
+
+    public async Task<UserProfileDto?> UpdateUserAsync(
+        Guid id,
+        UserProfileUpdateDto dto,
+        CancellationToken cancellationToken = default)
+    {
+        var updatedUser = await _userService.UpdateUserAsync(
+            id,
+            dto.FirstName,
+            dto.LastName,
+            dto.Email,
+            dto.Role,
+            dto.AccountStatus);
+
+        return updatedUser is null
+            ? null
+            : _mapper.Map<UserProfileDto>(updatedUser);
     }
 }

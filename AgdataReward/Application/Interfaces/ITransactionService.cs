@@ -7,5 +7,6 @@ public interface ITransactionService
     Task<IEnumerable<RewardTransaction>> GetUserTransactionsAsync(Guid userId);
     Task<RewardPoints> CreateRewardPointsAsync(int pointsValue);
     Task<RewardPoints?> GetRewardPointsByIdAsync(Guid id);
+    Task<RewardPoints> UpdateRewardPointsAsync(Guid id, int newPointsValue);
     Task<IEnumerable<RewardPoints>> ListRewardPointsAsync();
 }

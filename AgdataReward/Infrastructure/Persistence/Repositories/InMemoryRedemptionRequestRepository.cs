@@ -15,6 +15,12 @@ public class InMemoryRedemptionRequestRepository : IRedemptionRequestRepository
         return Task.FromResult(process);
     }
 
+    public Task AddAsync(RedemptionRequest request)
+    {
+        _processes[request.RedemptionId] = request;
+        return Task.CompletedTask;
+    }
+
     public Task UpdateAsync(RedemptionRequest process)
     {
         _processes[process.RedemptionId] = process;
@@ -38,5 +44,22 @@ public class InMemoryRedemptionRequestRepository : IRedemptionRequestRepository
         .ToList();
 
         return Task.FromResult<IEnumerable<RedemptionRequest>>(result);
+    }
+
+    public Task<IEnumerable<RedemptionRequest>> GetAllPendingAsync()
+    {
+        var pending = _processes.Values
+            .Where(r => r.Status == RedemptionStatus.Pending)
+            .ToList();
+        return Task.FromResult<IEnumerable<RedemptionRequest>>(pending);
+    }
+
+    public Task<IEnumerable<RedemptionRequest>> GetByRedemptionIdsAsync(IEnumerable<Guid> redemptionIds)
+    {
+        var ids = redemptionIds.ToHashSet();
+        var requests = _processes.Values
+            .Where(r => ids.Contains(r.RedemptionId))
+            .ToList();
+        return Task.FromResult<IEnumerable<RedemptionRequest>>(requests);
     }
 }

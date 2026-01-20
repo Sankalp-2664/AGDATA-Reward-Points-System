@@ -1,0 +1,63 @@
+﻿<div class="login-page">
+  <div class="login-card">
+
+    <!-- Logo -->
+    <div class="logo">
+      <img src="assets/images/agdata-logo.png" alt="AGDATA Logo" />
+    </div>
+
+    <!-- Title -->
+    <h2>Reward System</h2>
+    <p class="subtitle">Sign in to access your rewards</p>
+
+    <!-- Error Message -->
+    <div *ngIf="errorMessage" class="error-message">
+      <span class="error-icon">⚠</span>
+      {{ errorMessage }}
+    </div>
+
+    <!-- Login Form -->
+    <form (ngSubmit)="onLogin()" #loginForm="ngForm">
+
+      <!-- Email -->
+      <label for="email">Email</label>
+      <div class="input-box">
+        <span class="icon">✉</span>
+        <input
+          id="email"
+          type="email"
+          name="email"
+          placeholder="Enter your email"
+          [(ngModel)]="email"
+          [disabled]="isLoading"
+          required
+        />
+      </div>
+
+      <!-- Password -->
+      <label for="password">Password</label>
+      <div class="input-box">
+        <span class="icon">🔒</span>
+        <input
+          id="password"
+          type="password"
+          name="password"
+          placeholder="Enter your password"
+          [(ngModel)]="password"
+          [disabled]="isLoading"
+          required
+        />
+      </div>
+
+      <!-- Button -->
+      <button type="submit" [disabled]="!loginForm.valid || isLoading">
+        <span *ngIf="!isLoading">Login</span>
+        <span *ngIf="isLoading">Signing in...</span>
+      </button>
+    </form>
+
+    <!-- Footer -->
+    <a class="forgot" href="#">Forgot password?</a>
+
+  </div>
+</div>

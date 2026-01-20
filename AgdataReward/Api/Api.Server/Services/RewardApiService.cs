@@ -24,6 +24,11 @@ public interface IRewardApiService
     Task<RewardPointsDto?> GetRewardPointsByIdAsync(
         Guid id,
         CancellationToken cancellationToken = default);
+
+    Task<RewardPointsDto> UpdateRewardPointsAsync(
+        Guid id,
+        RewardPointsUpdateDto dto,
+        CancellationToken cancellationToken = default);
 }
 
 public class RewardApiService(
@@ -66,5 +71,14 @@ public class RewardApiService(
             return null;
 
         return _mapper.Map<RewardPointsDto>(points);
+    }
+
+    public async Task<RewardPointsDto> UpdateRewardPointsAsync(
+        Guid id,
+        RewardPointsUpdateDto dto,
+        CancellationToken cancellationToken = default)
+    {
+        var updated = await _transactionService.UpdateRewardPointsAsync(id, dto.PointsValue);
+        return _mapper.Map<RewardPointsDto>(updated);
     }
 }

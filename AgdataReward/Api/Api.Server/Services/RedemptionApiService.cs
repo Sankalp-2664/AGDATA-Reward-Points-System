@@ -29,13 +29,28 @@ public interface IRedemptionApiService
     Task CompleteRedemptionAsync(
         Guid id,
         CancellationToken cancellationToken = default);
+
+    Task<IEnumerable<PendingRedemptionDto>> GetAllPendingRequestsAsync(
+        CancellationToken cancellationToken = default);
+
+    Task<IEnumerable<PendingRedemptionDto>> GetUserRedemptionHistoryAsync(
+        Guid userId,
+        CancellationToken cancellationToken = default);
 }
 
 public class RedemptionApiService(
     IRedemptionService redemptionService,
+    IRedemptionRecordRepository recordRepository,
+    IRedemptionRequestRepository requestRepository,
+    IUserRepository userRepository,
+    IProductRepository productRepository,
     IMapper mapper) : IRedemptionApiService
 {
     private readonly IRedemptionService _redemptionService = redemptionService;
+    private readonly IRedemptionRecordRepository _recordRepository = recordRepository;
+    private readonly IRedemptionRequestRepository _requestRepository = requestRepository;
+    private readonly IUserRepository _userRepository = userRepository;
+    private readonly IProductRepository _productRepository = productRepository;
     private readonly IMapper _mapper = mapper;
 
     public async Task<RedemptionRecordDto> RequestRedemptionAsync(
@@ -76,5 +91,81 @@ public class RedemptionApiService(
         CancellationToken cancellationToken = default)
     {
         await _redemptionService.CompleteRedemptionAsync(id);
+    }
+
+    public async Task<IEnumerable<PendingRedemptionDto>> GetAllPendingRequestsAsync(
+        CancellationToken cancellationToken = default)
+    {
+        var pendingRequests = await _redemptionService.GetAllPendingRequestsAsync();
+        var result = new List<PendingRedemptionDto>();
+
+        foreach (var request in pendingRequests)
+        {
+            var record = await _recordRepository.GetByIdAsync(request.RedemptionId);
+            if (record == null) continue;
+
+            var user = await _userRepository.GetByIdAsync(record.UserId);
+            var product = await _productRepository.GetByIdAsync(record.ProductId);
+
+            if (user == null || product == null) continue;
+
+            result.Add(new PendingRedemptionDto
+            {
+                Id = request.Id,
+                RedemptionId = request.RedemptionId,
+                UserId = record.UserId,
+                EmployeeId = user.EmployeeId.Value,
+                UserName = $"{user.FirstName} {user.LastName}",
+                UserEmail = user.Email.Value,
+                ProductId = record.ProductId,
+                ProductName = product.Name,
+                PointsUsed = request.PointsUsed,
+                Status = request.Status,
+                CreatedAt = request.CreatedAt,
+                RedeemedAt = record.RedeemedAt
+            });
+        }
+
+        return result;
+    }
+
+    public async Task<IEnumerable<PendingRedemptionDto>> GetUserRedemptionHistoryAsync(
+        Guid userId,
+        CancellationToken cancellationToken = default)
+    {
+        var userRecords = await _recordRepository.GetByUserIdAsync(userId);
+        var redemptionIds = userRecords.Select(r => r.Id).ToList();
+        var requests = await _requestRepository.GetByRedemptionIdsAsync(redemptionIds);
+        
+        var result = new List<PendingRedemptionDto>();
+
+        foreach (var record in userRecords)
+        {
+            var request = requests.FirstOrDefault(r => r.RedemptionId == record.Id);
+            if (request == null) continue;
+
+            var user = await _userRepository.GetByIdAsync(record.UserId);
+            var product = await _productRepository.GetByIdAsync(record.ProductId);
+
+            if (user == null || product == null) continue;
+
+            result.Add(new PendingRedemptionDto
+            {
+                Id = request.Id,
+                RedemptionId = request.RedemptionId,
+                UserId = record.UserId,
+                EmployeeId = user.EmployeeId.Value,
+                UserName = $"{user.FirstName} {user.LastName}",
+                UserEmail = user.Email.Value,
+                ProductId = record.ProductId,
+                ProductName = product.Name,
+                PointsUsed = request.PointsUsed,
+                Status = request.Status,
+                CreatedAt = request.CreatedAt,
+                RedeemedAt = record.RedeemedAt
+            });
+        }
+
+        return result;
     }
 }

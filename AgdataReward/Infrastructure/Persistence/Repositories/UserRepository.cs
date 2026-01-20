@@ -15,6 +15,8 @@ public class UserRepository(RewardDbContext context) : IUserRepository
     {
         return await _context.UserProfiles
             .Include(u => u.Account)
+            .Include(u => u.Roles)
+                .ThenInclude(ur => ur.Role)
             .SingleOrDefaultAsync(u => u.Id == id, cancellationToken);
     }
 
@@ -24,6 +26,8 @@ public class UserRepository(RewardDbContext context) : IUserRepository
     {
         return await _context.UserProfiles
             .Include(u => u.Account)
+            .Include(u => u.Roles)
+                .ThenInclude(ur => ur.Role)
             .SingleOrDefaultAsync(u => u.Email == email, cancellationToken);
     }
 
@@ -36,6 +40,8 @@ public class UserRepository(RewardDbContext context) : IUserRepository
 
         return await _context.UserProfiles
             .Include(u => u.Account)
+            .Include(u => u.Roles)
+                .ThenInclude(ur => ur.Role)
             .SingleOrDefaultAsync(u => u.Email == emailVo, cancellationToken);
     }
 
@@ -45,6 +51,8 @@ public class UserRepository(RewardDbContext context) : IUserRepository
     {
         return await _context.UserProfiles
             .Include(u => u.Account)
+            .Include(u => u.Roles)
+                .ThenInclude(ur => ur.Role)
             .SingleOrDefaultAsync(u => u.EmployeeId == employeeId, cancellationToken);
     }
 
@@ -56,6 +64,8 @@ public class UserRepository(RewardDbContext context) : IUserRepository
         // This one stays FirstOrDefault because BOTH fields may exist separately
         return await _context.UserProfiles
             .Include(u => u.Account)
+            .Include(u => u.Roles)
+                .ThenInclude(ur => ur.Role)
             .FirstOrDefaultAsync(
                 u => u.Email == email || u.EmployeeId == employeeId,
                 cancellationToken);
@@ -66,6 +76,8 @@ public class UserRepository(RewardDbContext context) : IUserRepository
     {
         return await _context.UserProfiles
             .Include(u => u.Account)
+            .Include(u => u.Roles)
+                .ThenInclude(ur => ur.Role)
             .ToListAsync(cancellationToken);
     }
 

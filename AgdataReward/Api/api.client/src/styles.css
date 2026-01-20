@@ -1,1 +1,26 @@
-/* You can add global styles to this file, and also import other style files */
+/* Import design tokens and global styles */
+@import './styles/design-tokens.css';
+
+/* Global HTML and body styles */
+html, body {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  height: 100%;
+  background-color: var(--color-neutral-50);
+  color: var(--color-neutral-900);
+  font-family: var(--font-family);
+  font-size: var(--font-size-body);
+  line-height: var(--line-height-body);
+}
+
+/* Disable scrollbar for body when modal is open */
+body.modal-open {
+  overflow: hidden;
+}
+
+/* Smooth scrolling */
+html {
+  scroll-behavior: smooth;
+}
+

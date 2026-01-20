@@ -31,4 +31,13 @@ public class RewardTransactionRepository(RewardDbContext context) : IRewardTrans
             .Include(t => t.RedemptionRequest)
             .ToListAsync();
     }
+
+    public async Task<bool> HasTransactionsForEventAsync(Guid eventId)
+    {
+        // Since EventId references EventInstance (not EventDefinition), 
+        // we check the Notes field which contains the event ID
+        var eventIdString = eventId.ToString();
+        return await _context.RewardTransactions
+            .AnyAsync(t => t.Notes.Contains(eventIdString));
+    }
 }

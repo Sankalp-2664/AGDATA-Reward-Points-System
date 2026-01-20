@@ -59,6 +59,23 @@ builder.Services.AddSwaggerGen(c =>
 builder.Services.AddDbContext<RewardDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("RewardDb")));
 
+
+//angular 
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowAngular", policy =>
+    {
+        policy.WithOrigins(
+                "http://localhost:4200",   // Angular default
+                "http://localhost:51552",  // Alternative port
+                "http://127.0.0.1:4200"    // Also allow 127.0.0.1
+            )
+            .AllowAnyHeader()
+            .AllowAnyMethod()
+            .AllowCredentials();
+    });
+});
+
 // --------------------------------------------------------
 // 3. Repository registrations
 // --------------------------------------------------------
@@ -107,6 +124,7 @@ builder.Services.AddScoped<IRedemptionApiService, RedemptionApiService>();
 builder.Services.AddScoped<IProductApiService, ProductApiService>();
 builder.Services.AddScoped<IInventoryApiService, InventoryApiService>();
 builder.Services.AddScoped<IEventApiService, EventApiService>();
+builder.Services.AddScoped<IRewardApiService, RewardApiService>();
 
 
 builder.Services.AddAutoMapper(typeof(MappingProfile));
@@ -172,11 +190,28 @@ if (app.Environment.IsDevelopment())
 
 app.UseRouting();
 
+app.UseCors("AllowAngular");
+
 app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
 
+// Apply pending migrations automatically
+using (var scope = app.Services.CreateScope())
+{
+    var dbContext = scope.ServiceProvider.GetRequiredService<RewardDbContext>();
+    await dbContext.Database.MigrateAsync();
+    Console.WriteLine("✓ Database migrations applied.");
+}
+
 await DbSeeder.SeedAsync(app.Services);
 
-app.Run();
+try
+{
+    app.Run();
+}
+catch (Exception ex)
+{
+    Console.WriteLine($"Application error: {ex}");
+}

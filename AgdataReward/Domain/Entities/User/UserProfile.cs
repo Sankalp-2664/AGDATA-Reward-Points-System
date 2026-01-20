@@ -115,5 +115,24 @@ namespace Domain.Entities.User
             FirstName = firstName.Trim();
             LastName = lastName.Trim();
         }
+
+        /// <summary>
+        /// Updates the user's email address.
+        /// </summary>
+        public void UpdateEmail(Email newEmail)
+        {
+            if (newEmail == null)
+                throw new ArgumentNullException(nameof(newEmail));
+
+            Email = newEmail;
+        }
+
+        /// <summary>
+        /// Clears all roles from the user.
+        /// </summary>
+        public void ClearRoles()
+        {
+            _roles.Clear();
+        }
     }
 }

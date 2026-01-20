@@ -21,4 +21,9 @@ public class InMemoryRedemptionRecordRepository : IRedemptionRecordRepository
         return Task.FromResult(_records.AsEnumerable());
     }
 
+    public Task<IEnumerable<RedemptionRecord>> GetByUserIdAsync(Guid userId)
+    {
+        var userRecords = _records.Where(r => r.UserId == userId).AsEnumerable();
+        return Task.FromResult(userRecords);
+    }
 }

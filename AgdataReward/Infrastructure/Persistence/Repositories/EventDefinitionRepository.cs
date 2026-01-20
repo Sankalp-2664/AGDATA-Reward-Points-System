@@ -34,6 +34,14 @@ public class EventDefinitionRepository(RewardDbContext context) : IEventDefiniti
 
     public async Task UpdateAsync(EventDefinition entity)
     {
+        // Detach any existing tracked entity with the same ID
+        var existingEntry = _context.ChangeTracker.Entries<EventDefinition>()
+            .FirstOrDefault(e => e.Entity.Id == entity.Id);
+        if (existingEntry != null)
+        {
+            _context.Entry(existingEntry.Entity).State = EntityState.Detached;
+        }
+        
         _context.EventDefinitions.Update(entity);
         await _context.SaveChangesAsync();
     }

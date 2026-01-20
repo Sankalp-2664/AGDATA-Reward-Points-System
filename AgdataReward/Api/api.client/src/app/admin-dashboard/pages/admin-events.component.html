@@ -1,0 +1,269 @@
+<div class="admin-events-container">
+  <div class="page-header">
+    <h2>Event Management</h2>
+    <button class="btn-primary" (click)="openCreateModal()">
+      + Create New Event
+    </button>
+  </div>
+
+  <!-- Filters Section -->
+  <div class="filters-section">
+    <app-search-filter
+      [placeholder]="'Search events...'"
+      [(searchQuery)]="searchQuery"
+      (search)="onSearch($event)"
+    ></app-search-filter>
+
+    <div class="filter-row">
+      <app-status-filter
+        [statuses]="statusOptions"
+        [(selectedStatus)]="selectedStatus"
+        (statusChange)="onStatusChange($event)"
+      ></app-status-filter>
+
+      <app-date-range-filter
+        [(startDate)]="filter.startDate!"
+        [(endDate)]="filter.endDate!"
+        (dateRangeChange)="onDateRangeChange($event)"
+      ></app-date-range-filter>
+
+      <button class="btn-secondary" (click)="clearFilters()">
+        Clear Filters
+      </button>
+    </div>
+  </div>
+
+  <!-- Results Count -->
+  <div class="results-info">
+    Showing {{ filteredEvents.length }} of {{ events.length }} events
+  </div>
+
+  <!-- Events Table -->
+  <div class="table-container">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Code</th>
+          <th>Name</th>
+          <th>Description</th>
+          <th>Prizes</th>
+          <th>Start Date</th>
+          <th>End Date</th>
+          <th>Participants</th>
+          <th>Status</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let event of filteredEvents">
+          <td>{{ event.eventId }}</td>
+          <td class="font-semibold">{{ event.name }}</td>
+          <td class="description-cell">{{ event.description }}</td>
+          <td>
+            <div class="prizes-mini">
+              <span>1st: {{ event.firstPrize }}</span>
+              <span>2nd: {{ event.secondPrize }}</span>
+              <span>3rd: {{ event.thirdPrize }}</span>
+            </div>
+          </td>
+          <td>{{ event.startDate | date:'shortDate' }}</td>
+          <td>{{ event.endDate | date:'shortDate' }}</td>
+          <td class="text-center">{{ event.participantsCount || 0 }}</td>
+          <td>
+            <span class="badge" [ngClass]="getEventStatusClass(event.status)">
+              {{ event.status }}
+            </span>
+          </td>
+          <td>
+            <div class="action-buttons">
+              <button class="btn-icon btn-edit" (click)="openEditModal(event)" title="Edit">
+                ✏️
+              </button>
+              <button class="btn-icon btn-complete" 
+                      *ngIf="event.status !== 'Completed'" 
+                      (click)="openAssignWinnersModal(event)" 
+                      title="Complete & Assign Winners">
+                🏆
+              </button>
+              <button class="btn-icon btn-delete" (click)="deleteEvent(event)" title="Delete">
+                🗑️
+              </button>
+            </div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div *ngIf="filteredEvents.length === 0" class="empty-state">
+      <p>No events found</p>
+      <button class="btn-primary" (click)="clearFilters()">Clear Filters</button>
+    </div>
+  </div>
+
+  <!-- Create/Edit Modal -->
+  <div class="modal-overlay" *ngIf="showModal" (click)="closeModal()">
+    <div class="modal-content" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h3>{{ modalMode === 'create' ? 'Create New Event' : 'Edit Event' }}</h3>
+        <button class="modal-close" (click)="closeModal()">×</button>
+      </div>
+      
+      <div class="modal-body">
+        <form>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Code *</label>
+              <input type="text" [(ngModel)]="eventForm.eventId" name="eventId" required />
+            </div>
+            
+            <div class="form-group">
+              <label>Event Name *</label>
+              <input type="text" [(ngModel)]="eventForm.name" name="name" required />
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label>Description *</label>
+            <textarea [(ngModel)]="eventForm.description" name="description" rows="3" required></textarea>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label>First Prize Points</label>
+              <select [(ngModel)]="eventForm.firstPrizeId" name="firstPrizeId">
+                <option [ngValue]="undefined">Select reward points</option>
+                <option *ngFor="let rp of rewardPointsList" [ngValue]="rp.id">
+                  {{ rp.pointsValue }} points (ID: {{ rp.id.substring(0, 8) }}...)
+                </option>
+              </select>
+            </div>
+            
+            <div class="form-group">
+              <label>Second Prize Points</label>
+              <select [(ngModel)]="eventForm.secondPrizeId" name="secondPrizeId">
+                <option [ngValue]="undefined">Select reward points</option>
+                <option *ngFor="let rp of rewardPointsList" [ngValue]="rp.id">
+                  {{ rp.pointsValue }} points (ID: {{ rp.id.substring(0, 8) }}...)
+                </option>
+              </select>
+            </div>
+            
+            <div class="form-group">
+              <label>Third Prize Points</label>
+              <select [(ngModel)]="eventForm.thirdPrizeId" name="thirdPrizeId">
+                <option [ngValue]="undefined">Select reward points</option>
+                <option *ngFor="let rp of rewardPointsList" [ngValue]="rp.id">
+                  {{ rp.pointsValue }} points (ID: {{ rp.id.substring(0, 8) }}...)
+                </option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label>Start Date *</label>
+              <input type="date" [(ngModel)]="eventForm.startDate" name="startDate" required />
+            </div>
+            
+            <div class="form-group">
+              <label>End Date *</label>
+              <input type="date" [(ngModel)]="eventForm.endDate" name="endDate" required />
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label>Status *</label>
+              <select [(ngModel)]="eventForm.status" name="status" required>
+                <option value="Active">Active</option>
+                <option value="Upcoming">Upcoming</option>
+                <option value="Completed">Completed</option>
+                <option value="Cancelled">Cancelled</option>
+              </select>
+            </div>
+            
+            <div class="form-group">
+              <label>Location</label>
+              <input type="text" [(ngModel)]="eventForm.location" name="location" />
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label>Max Participants</label>
+              <input type="number" [(ngModel)]="eventForm.maxParticipants" name="maxParticipants" min="0" />
+            </div>
+            
+            <div class="form-group">
+              <label>Category</label>
+              <input type="text" [(ngModel)]="eventForm.category" name="category" />
+            </div>
+          </div>
+        </form>
+      </div>
+
+      <div class="modal-footer">
+        <button class="btn-secondary" (click)="closeModal()">Cancel</button>
+        <button class="btn-primary" (click)="saveEvent()">
+          {{ modalMode === 'create' ? 'Create Event' : 'Update Event' }}
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Assign Winners Modal -->
+  <div class="modal-overlay" *ngIf="showWinnersModal" (click)="closeWinnersModal()">
+    <div class="modal-content" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h3>🏆 Complete Event & Assign Winners</h3>
+        <button class="modal-close" (click)="closeWinnersModal()">×</button>
+      </div>
+      
+      <div class="modal-body" *ngIf="selectedEventForWinners">
+        <div class="event-info">
+          <p><strong>Event:</strong> {{ selectedEventForWinners.name }} ({{ selectedEventForWinners.eventId }})</p>
+          <p><strong>Prizes:</strong> 1st: {{ selectedEventForWinners.firstPrize }} pts | 2nd: {{ selectedEventForWinners.secondPrize }} pts | 3rd: {{ selectedEventForWinners.thirdPrize }} pts</p>
+        </div>
+        
+        <div class="winners-form">
+          <div class="form-group">
+            <label>🥇 1st Place Winner ({{ selectedEventForWinners.firstPrize }} points)</label>
+            <select [(ngModel)]="winnersForm.firstPlaceUserId" name="firstPlaceUserId">
+              <option value="">Select winner</option>
+              <option *ngFor="let user of usersList" [value]="user.id">
+                {{ user.firstName }} {{ user.lastName }} ({{ user.email }})
+              </option>
+            </select>
+          </div>
+          
+          <div class="form-group">
+            <label>🥈 2nd Place Winner ({{ selectedEventForWinners.secondPrize }} points)</label>
+            <select [(ngModel)]="winnersForm.secondPlaceUserId" name="secondPlaceUserId">
+              <option value="">Select winner</option>
+              <option *ngFor="let user of usersList" [value]="user.id">
+                {{ user.firstName }} {{ user.lastName }} ({{ user.email }})
+              </option>
+            </select>
+          </div>
+          
+          <div class="form-group">
+            <label>🥉 3rd Place Winner ({{ selectedEventForWinners.thirdPrize }} points)</label>
+            <select [(ngModel)]="winnersForm.thirdPlaceUserId" name="thirdPlaceUserId">
+              <option value="">Select winner</option>
+              <option *ngFor="let user of usersList" [value]="user.id">
+                {{ user.firstName }} {{ user.lastName }} ({{ user.email }})
+              </option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button class="btn-secondary" (click)="closeWinnersModal()">Cancel</button>
+        <button class="btn-primary" (click)="assignWinnersAndComplete()">
+          Complete Event & Assign Winners
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

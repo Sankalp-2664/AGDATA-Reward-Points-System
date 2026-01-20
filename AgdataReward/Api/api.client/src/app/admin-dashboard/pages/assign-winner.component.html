@@ -1,0 +1,131 @@
+<div class="assign-winner-container">
+  <!-- Header -->
+  <header class="page-header">
+    <button class="btn-back" (click)="cancelAssignment()">← Back to Dashboard</button>
+    <h1 *ngIf="event">Assign Winners for {{ event.name }}</h1>
+    <h1 *ngIf="!event">Assign Event Winners</h1>
+  </header>
+
+  <!-- Event Details -->
+  <section class="event-details" *ngIf="event">
+    <div class="detail-card">
+      <div class="detail-row">
+        <label>Code:</label>
+        <span>{{ event.eventId }}</span>
+      </div>
+      <div class="detail-row">
+        <label>Event Name:</label>
+        <span>{{ event.name }}</span>
+      </div>
+      <div class="detail-row">
+        <label>Description:</label>
+        <span>{{ event.description }}</span>
+      </div>
+      <div class="detail-row">
+        <label>Date Range:</label>
+        <span>{{ event.startDate }} to {{ event.endDate }}</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- Winner Assignment Form -->
+  <section class="form-section">
+    <h2>Assign Winners</h2>
+
+    <div *ngIf="errorMessage" class="error-message">
+      ⚠️ {{ errorMessage }}
+    </div>
+
+    <div class="winners-grid">
+      <!-- First Prize -->
+      <div class="winner-card">
+        <div class="prize-badge first-prize">🥇 1ST PRIZE</div>
+        <div class="prize-points" *ngIf="event">
+          {{ event.firstPrize }} Points
+        </div>
+        <div class="form-group">
+          <label>Select Winner *</label>
+          <select
+            [(ngModel)]="winners.firstPrizeWinnerId"
+            (change)="onWinnerChange('first')"
+            [class.error]="submitted && winners.firstPrizeWinnerId === 0"
+          >
+            <option [value]="0">-- Select Employee --</option>
+            <option *ngFor="let emp of employees" [value]="emp.id">
+              {{ emp.name }} ({{ emp.employeeId }})
+            </option>
+          </select>
+        </div>
+        <div class="winner-info" *ngIf="winners.firstPrizeWinnerName">
+          <strong>{{ winners.firstPrizeWinnerName }}</strong>
+        </div>
+      </div>
+
+      <!-- Second Prize -->
+      <div class="winner-card">
+        <div class="prize-badge second-prize">🥈 2ND PRIZE</div>
+        <div class="prize-points" *ngIf="event">
+          {{ event.secondPrize }} Points
+        </div>
+        <div class="form-group">
+          <label>Select Winner *</label>
+          <select
+            [(ngModel)]="winners.secondPrizeWinnerId"
+            (change)="onWinnerChange('second')"
+            [class.error]="submitted && winners.secondPrizeWinnerId === 0"
+          >
+            <option [value]="0">-- Select Employee --</option>
+            <option *ngFor="let emp of employees" [value]="emp.id">
+              {{ emp.name }} ({{ emp.employeeId }})
+            </option>
+          </select>
+        </div>
+        <div class="winner-info" *ngIf="winners.secondPrizeWinnerName">
+          <strong>{{ winners.secondPrizeWinnerName }}</strong>
+        </div>
+      </div>
+
+      <!-- Third Prize -->
+      <div class="winner-card">
+        <div class="prize-badge third-prize">🥉 3RD PRIZE</div>
+        <div class="prize-points" *ngIf="event">
+          {{ event.thirdPrize }} Points
+        </div>
+        <div class="form-group">
+          <label>Select Winner *</label>
+          <select
+            [(ngModel)]="winners.thirdPrizeWinnerId"
+            (change)="onWinnerChange('third')"
+            [class.error]="submitted && winners.thirdPrizeWinnerId === 0"
+          >
+            <option [value]="0">-- Select Employee --</option>
+            <option *ngFor="let emp of employees" [value]="emp.id">
+              {{ emp.name }} ({{ emp.employeeId }})
+            </option>
+          </select>
+        </div>
+        <div class="winner-info" *ngIf="winners.thirdPrizeWinnerName">
+          <strong>{{ winners.thirdPrizeWinnerName }}</strong>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Action Buttons -->
+  <section class="action-section">
+    <button
+      class="btn-cancel"
+      (click)="cancelAssignment()"
+      [disabled]="loading"
+    >
+      Cancel
+    </button>
+    <button
+      class="btn-submit"
+      (click)="submitWinners()"
+      [disabled]="loading"
+    >
+      {{ loading ? 'Assigning...' : 'Assign Winners' }}
+    </button>
+  </section>
+</div>

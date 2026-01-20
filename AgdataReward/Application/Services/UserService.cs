@@ -1,5 +1,6 @@
 ﻿using Application.Interfaces;
 using Domain.Entities.User;
+using Domain.Enums;
 using Domain.Exceptions;
 using Domain.ValueObjects;
 
@@ -71,12 +72,10 @@ public class UserService(
         // 7) Attach to aggregate
         profile.AttachAccount(account);
 
-        // 8) Persist profile + account
-        // Depending on your repo implementations, you can either:
-        // a) Save via profile only (if cascade is configured), or
-        // b) Save both (current pattern).
+        // 8) Persist profile + account in a single transaction
+        // Since UserAccount is attached to UserProfile, we only need to add the profile
+        // EF Core will handle the cascade insert of the account
         await _userRepository.AddAsync(profile);
-        await _accountRepository.AddAsync(account);
 
         return profile;
     }
@@ -99,4 +98,89 @@ public class UserService(
 
         return await _userRepository.GetByIdAsync(userId);
     }
+
+    public async Task<List<UserProfile>> GetAllUsersAsync(CancellationToken cancellationToken = default)
+    {
+        var users = await _userRepository.ListAsync(cancellationToken);
+        return users.ToList();
+    }
+
+    public async Task<UserProfile?> UpdateUserAsync(
+        Guid userId,
+        string firstName,
+        string lastName,
+        string email,
+        string roleName,
+        string? accountStatus = null)
+    {
+        // Get existing user with all navigation properties
+        var user = await _userRepository.GetByIdAsync(userId);
+        if (user == null)
+            return null;
+
+        // Update basic info
+        user.UpdateName(firstName.Trim(), lastName.Trim());
+
+        // Update email if changed
+        var newEmail = new Email(email);
+        if (user.Email.Value != newEmail.Value)
+        {
+            // Check if new email is already taken
+            var existingUser = await _userRepository.GetByEmailAsync(newEmail);
+            if (existingUser != null && existingUser.Id != userId)
+                throw new DuplicateUserException($"Email '{email}' is already in use.");
+            
+            user.UpdateEmail(newEmail);
+        }
+
+        // Update role only if it has changed
+        var currentRoleName = user.Roles.FirstOrDefault()?.Role?.Name;
+        if (currentRoleName != roleName)
+        {
+            var newRole = await _roleRepository.GetByNameAsync(roleName);
+            if (newRole == null)
+                throw new ArgumentException($"Invalid role: {roleName}", nameof(roleName));
+
+            // Remove existing roles
+            var existingRoles = user.Roles.ToList();
+            foreach (var userRole in existingRoles)
+            {
+                // Need to load the Role entity if not loaded
+                if (userRole.Role == null)
+                {
+                    var roleEntity = await _roleRepository.GetByIdAsync(userRole.RoleId);
+                    if (roleEntity != null)
+                        user.RemoveRole(roleEntity);
+                }
+                else
+                {
+                    user.RemoveRole(userRole.Role);
+                }
+            }
+
+            // Add new role
+            user.AssignRole(newRole);
+        }
+
+        // Update account status if provided and different from current
+        if (!string.IsNullOrWhiteSpace(accountStatus) && user.Account != null)
+        {
+            var targetStatus = accountStatus.Equals("Active", StringComparison.OrdinalIgnoreCase) 
+                ? AccountStatus.Active 
+                : AccountStatus.Inactive;
+
+            // Only update if the status is actually changing
+            if (user.Account.Status != targetStatus)
+            {
+                if (targetStatus == AccountStatus.Active)
+                    user.Account.ActivateAccount();
+                else
+                    user.Account.SuspendAccount();
+            }
+        }
+
+        await _userRepository.UpdateAsync(user);
+        return user;
+    }
+
 }

@@ -5,8 +5,8 @@
 /// </summary>
 public class RewardPoints
 {
-    public Guid Id { get; } // Primary key
-    public int PointsValue { get; } // The value of the reward points
+    public Guid Id { get; private set; } // Primary key
+    public int PointsValue { get; private set; } // The value of the reward points
 
     protected RewardPoints() { } // For ORM
     public RewardPoints(Guid id, int pointsValue)
@@ -18,5 +18,17 @@ public class RewardPoints
 
         Id = id;
         PointsValue = pointsValue;
+    }
+
+    /// <summary>
+    /// Updates the points value.
+    /// </summary>
+    /// <param name="newPointsValue">The new points value.</param>
+    public void UpdatePointsValue(int newPointsValue)
+    {
+        if (newPointsValue <= 0)
+            throw new ArgumentOutOfRangeException(nameof(newPointsValue), "Points must be greater than zero.");
+
+        PointsValue = newPointsValue;
     }
 }

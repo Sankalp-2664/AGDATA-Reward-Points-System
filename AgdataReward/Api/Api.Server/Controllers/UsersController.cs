@@ -20,6 +20,55 @@ public class UsersController(IUserApiService userApiService, ILogger<UsersContro
     private readonly ILogger<UsersController> _logger = logger;
 
     /// <summary>
+    /// Gets the currently authenticated user's profile.
+    /// </summary>
+    /// <returns>The current user's profile details.</returns>
+    /// <remarks>
+    /// Sample request:
+    ///
+    ///     GET /api/users/me
+    ///
+    /// Sample response:
+    ///
+    ///     200 OK
+    ///     {
+    ///       "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+    ///       "employeeId": "EMP001",
+    ///       "firstName": "Sankalp",
+    ///       "lastName": "Chakre",
+    ///       "email": "user@agdata.com",
+    ///       "roles": ["User"],
+    ///       "account": {
+    ///         "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+    ///         "rewardBalance": 100,
+    ///         "status": "Active"
+    ///       }
+    ///     }
+    /// </remarks>
+    /// <response code="200">Returns the current user's profile.</response>
+    /// <response code="401">If the caller is not authenticated.</response>
+    /// <response code="404">If the user was not found.</response>
+    [HttpGet("me")]
+    [Authorize]
+    [ProducesResponseType(typeof(UserProfileDto), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<ActionResult<UserProfileDto>> GetCurrentUser(CancellationToken cancellationToken)
+    {
+        var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+        
+        if (string.IsNullOrEmpty(userId))
+            return Unauthorized();
+
+        var userDto = await _userApiService.GetCurrentUserAsync(userId, cancellationToken);
+
+        if (userDto is null)
+            return NotFound();
+
+        return Ok(userDto);
+    }
+
+    /// <summary>
     /// Gets a user profile by its unique identifier.
     /// </summary>
     /// <param name="id">The unique identifier of the user.</param>
@@ -166,4 +215,71 @@ public class UsersController(IUserApiService userApiService, ILogger<UsersContro
 
         return Ok(accountDto);
     }
+
+    /// <summary>
+    /// Gets all users (Admin only).
+    /// </summary>
+    /// <remarks>
+    /// GET /api/users
+    /// </remarks>
+    [HttpGet]
+    [AllowAnonymous] // TODO: Change back to [Authorize(Roles = "Admin")] after testing
+    [ProducesResponseType(typeof(List<UserProfileDto>), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    public async Task<ActionResult<List<UserProfileDto>>> GetAllUsers(CancellationToken cancellationToken)
+    {
+        var users = await _userApiService.GetAllUsersAsync(cancellationToken);
+        return Ok(users);
+    }
+
+    /// <summary>
+    /// Updates an existing user's profile.
+    /// </summary>
+    /// <param name="id">The unique identifier of the user.</param>
+    /// <param name="updateDto">User update payload.</param>
+    /// <returns>The updated user profile.</returns>
+    /// <remarks>
+    /// Sample request:
+    ///
+    ///     PUT /api/users/{id}
+    ///     {
+    ///       "firstName": "John",
+    ///       "lastName": "Doe",
+    ///       "email": "john.doe@agdata.com",
+    ///       "role": "Admin",
+    ///       "accountStatus": "Active"
+    ///     }
+    /// </remarks>
+    /// <response code="200">Returns the updated user profile.</response>
+    /// <response code="400">If the request body is invalid.</response>
+    /// <response code="404">If the user is not found.</response>
+    [HttpPut("{id:guid}")]
+    [AllowAnonymous] // TODO: Change to [Authorize]
+    [ProducesResponseType(typeof(UserProfileDto), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<ActionResult<UserProfileDto>> UpdateUser(
+        Guid id,
+        [FromBody] UserProfileUpdateDto updateDto,
+        CancellationToken cancellationToken)
+    {
+        if (!ModelState.IsValid)
+            return BadRequest(ModelState);
+
+        try
+        {
+            var updatedUser = await _userApiService.UpdateUserAsync(id, updateDto, cancellationToken);
+            
+            if (updatedUser is null)
+                return NotFound();
+
+            return Ok(updatedUser);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogWarning(ex, "Error updating user");
+            return BadRequest(new { message = ex.Message });
+        }
+    }
+
 }

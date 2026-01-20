@@ -35,6 +35,8 @@ public class ProductInventory
         StockQuantity -= qty;
     }
 
+    public void Activate() => IsActive = true; // Activate inventory
+
     public void Deactivate() => IsActive = false; // Soft delete
 
 }

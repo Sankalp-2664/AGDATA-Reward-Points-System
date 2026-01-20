@@ -64,4 +64,36 @@ public class ProductService(
         return true;
     }
 
+    public async Task<ProductInformation> UpdateProductAsync(Guid id, string? skuString, string? name, Guid? rewardPointsId)
+    {
+        var product = await _productRepository.GetByIdAsync(id);
+        if (product == null)
+            throw new ArgumentException("Product not found.");
+
+        // Update SKU if provided
+        if (!string.IsNullOrWhiteSpace(skuString))
+        {
+            var newSku = new SKU(skuString);
+            product.UpdateSKU(newSku);
+        }
+
+        // Update Name if provided
+        if (!string.IsNullOrWhiteSpace(name))
+        {
+            product.UpdateName(name);
+        }
+
+        // Update RewardPoints if provided
+        if (rewardPointsId.HasValue && rewardPointsId.Value != Guid.Empty)
+        {
+            var rewardPoints = await _rewardPointsRepository.GetByIdAsync(rewardPointsId.Value);
+            if (rewardPoints == null)
+                throw new ArgumentException("Invalid reward points configuration.");
+            
+            product.UpdateRewardPoints(rewardPointsId.Value);
+        }
+
+        await _productRepository.UpdateAsync(product);
+        return await _productRepository.GetByIdAsync(id) ?? product;
+    }
 }

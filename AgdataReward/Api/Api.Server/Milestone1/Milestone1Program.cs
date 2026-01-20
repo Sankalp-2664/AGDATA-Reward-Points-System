@@ -90,7 +90,7 @@ public static class Milestone1Program
         // =========================
         // 2. Create Event
         // =========================
-        var eventDef = await eventService.CreateEventAsync("HACK", "Hackathon");
+        var eventDef = await eventService.CreateEventAsync("HACK", "Hackathon", DateTime.Now, DateTime.Now.AddDays(7));
         Console.WriteLine($"Created event: {eventDef.Title}");
 
         // =========================

@@ -1,0 +1,100 @@
+<div class="products-shell">
+  <!-- Main Content -->
+  <main class="content">
+    <!-- Points Banner -->
+    <div class="points-banner">
+      <div class="points-info">
+        <span class="points-label">Your Available Points:</span>
+        <span class="points-value">{{ userPoints }}</span>
+      </div>
+    </div>
+
+    <!-- Filters Section -->
+    <div class="filters-section">
+      <div class="search-filter-container">
+        <input 
+          type="text" 
+          class="search-input"
+          [(ngModel)]="searchQuery"
+          (ngModelChange)="onSearch($event)"
+          placeholder="Search products by name, ID, or description..."
+        />
+        <div class="filter-dropdown-container">
+          <button class="filter-button" (click)="toggleFilterDropdown()">
+            <span>Points Range</span>
+            <span class="filter-icon">{{ filterDropdownOpen ? '▲' : '▼' }}</span>
+          </button>
+          <div class="filter-dropdown" *ngIf="filterDropdownOpen">
+            <div class="filter-option" 
+                 *ngFor="let range of pointRanges" 
+                 (click)="selectPointRange(range)"
+                 [class.active]="selectedRange === range.label">
+              {{ range.label }}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Results Count -->
+    <div class="results-info" *ngIf="filteredProducts.length > 0">
+      <span>Showing {{ filteredProducts.length }} of {{ products.length }} products</span>
+    </div>
+
+    <!-- Products Grid -->
+    <section class="products-grid">
+      <article *ngFor="let product of filteredProducts" class="product-card">
+        <div class="product-header">
+          <h3 class="product-name">{{ product.name }}</h3>
+          <div class="product-points">{{ product.points }} pts</div>
+        </div>
+        
+        <div class="product-body">
+          <div class="product-info-row">
+            <span class="info-label">Product ID:</span>
+            <span class="info-value">{{ product.productId }}</span>
+          </div>
+          <div class="product-info-row" *ngIf="product.category">
+            <span class="info-label">Category:</span>
+            <span class="info-value">{{ product.category }}</span>
+          </div>
+          <div class="product-info-row">
+            <span class="info-label">Available Stock:</span>
+            <span class="info-value" [class.out-of-stock]="product.stock === 0">
+              {{ product.stock }} units
+            </span>
+          </div>
+          <div class="product-info-row">
+            <span class="info-label">Status:</span>
+            <span class="status-badge" [ngClass]="'status-' + product.status.toLowerCase()">
+              {{ product.status }}
+            </span>
+          </div>
+          <div class="product-description" *ngIf="product.description">
+            {{ product.description }}
+          </div>
+        </div>
+
+        <div class="product-footer">
+          <button
+            class="redeem-btn"
+            [class.disabled]="!canRedeem(product)"
+            [disabled]="!canRedeem(product)"
+            (click)="redeemProduct(product)"
+          >
+            {{ canRedeem(product) ? 'Redeem Now' : 
+               (product.stock === 0 ? 'Out of Stock' : 'Insufficient Points') }}
+          </button>
+        </div>
+      </article>
+
+      <div *ngIf="filteredProducts.length === 0" class="empty-state">
+        <div class="empty-icon">🔍</div>
+        <p>No products found matching your filters</p>
+        <button class="clear-filters-btn" (click)="clearFilters()">
+          Clear Filters
+        </button>
+      </div>
+    </section>
+  </main>
+</div>

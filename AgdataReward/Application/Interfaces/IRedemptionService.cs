@@ -9,4 +9,5 @@ public interface IRedemptionService
     Task RejectRedemptionAsync(Guid redemptionId);
     Task CompleteRedemptionAsync(Guid redemptionId);
     Task<RedemptionRecord?> GetRedemptionByIdAsync(Guid redemptionId);
+    Task<IEnumerable<RedemptionRequest>> GetAllPendingRequestsAsync();
 }

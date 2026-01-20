@@ -36,4 +36,14 @@ public class InMemoryProductRepository : IProductRepository
         return Task.CompletedTask;
     }
 
+    public Task UpdateAsync(ProductInformation product)
+    {
+        var existing = _products.FirstOrDefault(p => p.Id == product.Id);
+        if (existing != null)
+        {
+            _products.Remove(existing);
+            _products.Add(product);
+        }
+        return Task.CompletedTask;
+    }
 }

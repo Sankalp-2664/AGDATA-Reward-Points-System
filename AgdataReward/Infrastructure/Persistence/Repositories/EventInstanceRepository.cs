@@ -37,4 +37,11 @@ public class EventInstanceRepository(RewardDbContext context) : IEventInstanceRe
         await _context.SaveChangesAsync();
     }
 
+    public async Task<IEnumerable<EventInstance>> GetByEventIdAsync(Guid eventId)
+    {
+        return await _context.EventInstances
+            .AsNoTracking()
+            .Where(i => i.EventId == eventId)
+            .ToListAsync();
+    }
 }

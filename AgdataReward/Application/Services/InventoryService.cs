@@ -20,4 +20,18 @@ public class InventoryService(
         inventory.IncreaseStock(quantityChange);
         await _inventoryRepository.UpdateAsync(inventory);
     }
+
+    public async Task UpdateStatusAsync(Guid productId, bool isActive)
+    {
+        var inventory = await _inventoryRepository.GetByProductIdAsync(productId);
+        if (inventory == null)
+            throw new ArgumentException("Invalid product ID.");
+
+        if (isActive)
+            inventory.Activate();
+        else
+            inventory.Deactivate();
+
+        await _inventoryRepository.UpdateAsync(inventory);
+    }
 }

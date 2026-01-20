@@ -8,5 +8,5 @@ public interface IProductService
     Task<IEnumerable<ProductInformation>> GetCatalogAsync();
     Task<ProductInformation?> GetByIdAsync(Guid id);
     Task<bool> DeleteProductAsync(Guid id);
-
+    Task<ProductInformation> UpdateProductAsync(Guid id, string? sku, string? name, Guid? rewardPointsId);
 }

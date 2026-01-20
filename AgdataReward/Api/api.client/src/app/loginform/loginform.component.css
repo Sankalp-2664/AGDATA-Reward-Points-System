@@ -1,0 +1,138 @@
+/* ===== Color Variables ===== */
+:root {
+  --primary-green: #205631;
+  --card-bg: #EFEFED;
+  --secondary-green: #5E846A;
+}
+
+/* ===== Page Layout ===== */
+.login-page {
+  height: 100vh;
+  background-color: #205631;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Segoe UI', sans-serif;
+}
+
+/* ===== Card ===== */
+.login-card {
+  background: #EFEFED;
+  width: 380px;
+  padding: 36px;
+  border-radius: 4px;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+  text-align: center;
+}
+
+/* ===== Logo ===== */
+.logo {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 20px;
+}
+
+.logo img {
+  height: 60px;        
+  max-width: 180px;
+  object-fit: contain;
+}
+
+/* ===== Headings ===== */
+h2 {
+  color: #205631;
+  margin-bottom: 6px;
+}
+
+.subtitle {
+  font-size: 14px;
+  color: #5E846A;
+  margin-bottom: 28px;
+}
+
+/* ===== Error Message ===== */
+.error-message {
+  background-color: #f8d7da;
+  border: 1px solid #f5c6cb;
+  border-radius: 4px;
+  color: #721c24;
+  padding: 12px;
+  margin-bottom: 20px;
+  display: flex;
+  align-items: center;
+  font-size: 14px;
+}
+
+.error-icon {
+  margin-right: 8px;
+  font-size: 16px;
+}
+
+/* ===== Labels ===== */
+label {
+  display: block;
+  text-align: left;
+  font-weight: 600;
+  color: #205631;
+  margin-bottom: 6px;
+  margin-top: 16px;
+}
+
+/* ===== Inputs ===== */
+.input-box {
+  display: flex;
+  align-items: center;
+  background: #e4e4e4;
+  border-radius: 4px;
+  padding: 10px;
+}
+
+.input-box .icon {
+  margin-right: 8px;
+  opacity: 0.6;
+}
+
+.input-box input {
+  border: none;
+  outline: none;
+  background: transparent;
+  width: 100%;
+  font-size: 14px;
+}
+
+/* ===== Button ===== */
+button {
+  margin-top: 28px;
+  width: 100%;
+  padding: 12px;
+  border: none;
+  border-radius: 4px;
+  background: #205631;
+  color: white;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+button:hover {
+  opacity: 0.95;
+}
+
+button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.input-box input:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+/* ===== Footer ===== */
+.forgot {
+  display: block;
+  margin-top: 14px;
+  font-size: 12px;
+  color: #5E846A;
+  cursor: pointer;
+}

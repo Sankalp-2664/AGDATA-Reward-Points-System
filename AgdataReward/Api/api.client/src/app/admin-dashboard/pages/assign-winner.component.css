@@ -1,0 +1,315 @@
+.assign-winner-container {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #205631 0%, #1f4d2b 100%);
+  padding: 24px;
+  color: #1f2937;
+  font-family: system-ui, -apple-system, sans-serif;
+}
+
+/* ===== HEADER ===== */
+.page-header {
+  background: #EFEFED;
+  border-radius: 12px;
+  padding: 24px;
+  margin-bottom: 24px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.btn-back {
+  padding: 10px 18px;
+  background: #3b82f6;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 500;
+  transition: all 0.2s;
+  font-size: 14px;
+  flex-shrink: 0;
+}
+
+.btn-back:hover {
+  background: #2563eb;
+  transform: translateY(-1px);
+}
+
+.page-header h1 {
+  font-size: 28px;
+  color: #205631;
+  margin: 0;
+  flex: 1;
+}
+
+/* ===== EVENT DETAILS ===== */
+.event-details {
+  margin-bottom: 32px;
+}
+
+.detail-card {
+  background: #EFEFED;
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.detail-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 0;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.detail-row:last-child {
+  border-bottom: none;
+}
+
+.detail-row label {
+  font-weight: 600;
+  color: #374151;
+  min-width: 150px;
+}
+
+.detail-row span {
+  color: #6b7280;
+  flex: 1;
+  text-align: right;
+}
+
+/* ===== FORM SECTION ===== */
+.form-section {
+  background: #EFEFED;
+  border-radius: 12px;
+  padding: 24px;
+  margin-bottom: 24px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.form-section h2 {
+  font-size: 20px;
+  color: #1f2937;
+  margin-bottom: 20px;
+}
+
+/* ===== ERROR MESSAGE ===== */
+.error-message {
+  background: #fee2e2;
+  border-left: 4px solid #dc2626;
+  color: #991b1b;
+  padding: 12px 16px;
+  border-radius: 8px;
+  margin-bottom: 20px;
+  font-weight: 500;
+}
+
+/* ===== WINNERS GRID ===== */
+.winners-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 20px;
+}
+
+.winner-card {
+  background: white;
+  border-radius: 12px;
+  padding: 20px;
+  border: 2px solid #e5e7eb;
+  transition: all 0.3s ease;
+  display: flex;
+  flex-direction: column;
+}
+
+.winner-card:hover {
+  border-color: #3b82f6;
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.15);
+}
+
+.prize-badge {
+  display: inline-block;
+  padding: 8px 12px;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 13px;
+  margin-bottom: 8px;
+  text-align: center;
+  width: 100%;
+}
+
+.prize-badge.first-prize {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.prize-badge.second-prize {
+  background: #e0e7ff;
+  color: #312e81;
+}
+
+.prize-badge.third-prize {
+  background: #fce7f3;
+  color: #831843;
+}
+
+.prize-points {
+  font-size: 18px;
+  font-weight: 700;
+  color: #205631;
+  margin-bottom: 16px;
+  text-align: center;
+}
+
+/* ===== FORM GROUP ===== */
+.form-group {
+  margin-bottom: 16px;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: 500;
+  color: #374151;
+  font-size: 14px;
+}
+
+.form-group select {
+  width: 100%;
+  padding: 10px 12px;
+  border: 2px solid #e5e7eb;
+  border-radius: 8px;
+  font-size: 14px;
+  transition: all 0.2s;
+  background: white;
+  cursor: pointer;
+  font-family: inherit;
+}
+
+.form-group select:hover {
+  border-color: #d1d5db;
+}
+
+.form-group select:focus {
+  outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.form-group select.error {
+  border-color: #dc2626;
+  box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.1);
+}
+
+.winner-info {
+  margin-top: 12px;
+  padding: 12px;
+  background: #f0f9ff;
+  border-radius: 8px;
+  color: #0c4a6e;
+  font-size: 14px;
+  text-align: center;
+}
+
+/* ===== ACTION SECTION ===== */
+.action-section {
+  display: flex;
+  justify-content: center;
+  gap: 16px;
+  margin-top: 32px;
+}
+
+.btn-cancel,
+.btn-submit {
+  padding: 12px 32px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 16px;
+  transition: all 0.2s;
+  min-width: 150px;
+}
+
+.btn-cancel {
+  background: #f3f4f6;
+  color: #374151;
+}
+
+.btn-cancel:hover:not(:disabled) {
+  background: #e5e7eb;
+  transform: translateY(-1px);
+}
+
+.btn-submit {
+  background: #10b981;
+  color: white;
+}
+
+.btn-submit:hover:not(:disabled) {
+  background: #059669;
+  transform: translateY(-1px);
+}
+
+.btn-cancel:disabled,
+.btn-submit:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* ===== RESPONSIVE DESIGN ===== */
+@media (max-width: 768px) {
+  .assign-winner-container {
+    padding: 16px;
+  }
+
+  .page-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .page-header h1 {
+    font-size: 22px;
+  }
+
+  .winners-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .action-section {
+    flex-direction: column-reverse;
+  }
+
+  .btn-cancel,
+  .btn-submit {
+    width: 100%;
+  }
+}
+
+@media (max-width: 480px) {
+  .assign-winner-container {
+    padding: 12px;
+  }
+
+  .page-header {
+    padding: 16px;
+  }
+
+  .page-header h1 {
+    font-size: 18px;
+  }
+
+  .form-section {
+    padding: 16px;
+  }
+
+  .detail-row {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+
+  .detail-row span {
+    text-align: left;
+  }
+}

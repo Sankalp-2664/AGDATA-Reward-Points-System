@@ -1,12 +1,408 @@
-# Visual Studio cache
-.vs/
+# See https://docs.github.com/get-started/getting-started-with-git/ignoring-files
 
-# Build results
-bin/
-obj/
+########################################
+# Angular / Node.js
+########################################
+
+# Compiled output
+/dist
+/tmp
+/out-tsc
+/bazel-out
+
+# Node
+/node_modules
+npm-debug.log
+npm-debug.log*
+yarn-error.log
+yarn-error.log*
+yarn-debug.log*
+pnpm-debug.log
+pnpm-debug.log*
+lerna-debug.log
+lerna-debug.log*
+
+# Angular cache
+/.angular/
+.angular/cache
+/.angular/cache
+
+# Coverage
+/coverage
+
+# Misc
+/connect.lock
+/libpeerconnection.log
+testem.log
+/typings
+
+# e2e build files
+/e2e/*.js
+/e2e/*.map
+
+# Browser testing
+/karma/
+
+# Environment variables
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+
+########################################
+# .NET / Visual Studio
+########################################
 
 # User-specific files
-*.user
+*.rsuser
 *.suo
+*.user
 *.userosscache
 *.sln.docstates
+*.csproj.user
+*.http
+
+# Build results
+[Dd]ebug/
+[Dd]ebugPublic/
+[Rr]elease/
+[Rr]eleases/
+x64/
+x86/
+[Ww][Ii][Nn]32/
+[Aa][Rr][Mm]/
+[Aa][Rr][Mm]64/
+bld/
+[Bb]in/
+[Oo]bj/
+[Ll]og/
+[Ll]ogs/
+
+# .NET Core / Build artifacts
+project.lock.json
+project.fragment.lock.json
+artifacts/
+*.binlog
+
+# Visual Studio cache/options directory
+.vs/
+
+# Visual Studio Trace Files
+*.e2e
+
+# MSTest
+[Tt]est[Rr]esult*/
+[Bb]uild[Ll]og.*
+
+# NUnit
+*.VisualState.xml
+TestResult.xml
+nunit-*.xml
+
+# StyleCop
+StyleCopReport.xml
+
+# Files built by Visual Studio
+*_i.c
+*_p.c
+*_h.h
+*.ilk
+*.meta
+*.obj
+*.iobj
+*.pch
+*.pdb
+*.ipdb
+*.pgc
+*.pgd
+*.rsp
+*.sbr
+*.tlb
+*.tli
+*.tlh
+*.tmp
+*.tmp_proj
+*_wpftmp.csproj
+*.tlog
+*.vspscc
+*.vssscc
+.builds
+*.pidb
+*.svclog
+*.scc
+
+# Chutzpah Test files
+_Chutzpah*
+
+# Visual C++ cache files
+ipch/
+*.aps
+*.ncb
+*.opendb
+*.opensdf
+*.sdf
+*.cachefile
+*.VC.db
+*.VC.VC.opendb
+
+# Visual Studio profiler
+*.psess
+*.vsp
+*.vspx
+*.sap
+
+# ReSharper
+_ReSharper*/
+*.[Rr]e[Ss]harper
+*.DotSettings.user
+
+# JustCode
+.JustCode
+
+# TeamCity
+_TeamCity*
+
+# DotCover
+*.dotCover
+
+# AxoCover
+.axoCover/*
+!.axoCover/settings.json
+
+# Coverlet
+coverage*.json
+coverage*.xml
+coverage*.info
+
+# Visual Studio code coverage results
+*.coverage
+*.coveragexml
+
+# NCrunch
+_NCrunch_*
+.*crunch*.local.xml
+nCrunchTemp_*
+
+# MightyMoose
+*.mm.*
+AutoTest.Net/
+
+# Installshield output folder
+[Ee]xpress/
+
+# ClickOnce
+publish/
+
+# Publish output
+*.[Pp]ublish.xml
+*.azurePubxml
+*.pubxml
+*.publishproj
+PublishScripts/
+
+# NuGet Packages
+*.nupkg
+*.snupkg
+**/[Pp]ackages/*
+!**/[Pp]ackages/build/
+*.nuget.props
+*.nuget.targets
+
+# Azure Build Output
+csx/
+*.build.csdef
+ecf/
+rcf/
+
+# Windows Store app packages
+AppPackages/
+BundleArtifacts/
+Package.StoreAssociation.xml
+_pkginfo.txt
+*.appx
+*.appxbundle
+*.appxupload
+
+# Cache files
+*.[Cc]ache
+!?*.[Cc]ache/
+
+# Others
+ClientBin/
+~$*
+*.dbmdl
+*.dbproj.schemaview
+*.jfm
+*.pfx
+*.publishsettings
+orleans.codegen.cs
+
+# Upgrade / backup reports
+_UpgradeReport_Files/
+Backup*/
+UpgradeLog*.XML
+UpgradeLog*.htm
+ServiceFabricBackup/
+*.rptproj.bak
+
+# SQL Server files
+*.mdf
+*.ldf
+*.ndf
+
+# Business Intelligence projects
+*.rdl.data
+*.bim.layout
+*.bim_*.settings
+*.rptproj.rsuser
+*- [Bb]ackup.rdl
+*- [Bb]ackup ([0-9]).rdl
+*- [Bb]ackup ([0-9][0-9]).rdl
+
+# Microsoft Fakes
+FakesAssemblies/
+
+# GhostDoc
+*.GhostDoc.xml
+
+# Node.js Tools for Visual Studio
+.ntvs_analysis.dat
+
+# Visual Studio 6 legacy
+*.plg
+*.opt
+*.vbw
+*.vbp
+*.dsw
+*.dsp
+
+# Visual Studio LightSwitch build output
+**/*.HTMLClient/GeneratedArtifacts
+**/*.DesktopClient/GeneratedArtifacts
+**/*.DesktopClient/ModelManifest.xml
+**/*.Server/GeneratedArtifacts
+**/*.Server/ModelManifest.xml
+_Pvt_Extensions
+
+# Paket
+.paket/paket.exe
+paket-files/
+
+# FAKE
+.fake/
+
+# CodeRush
+.cr/personal
+
+# Python Tools for Visual Studio
+__pycache__/
+*.pyc
+
+# Tabs Studio
+*.tss
+
+# Telerik JustMock
+*.jmconfig
+
+# BizTalk
+*.btp.cs
+*.btm.cs
+*.odx.cs
+*.xsd.cs
+
+# OpenCover
+OpenCover/
+
+# Azure Stream Analytics
+ASALocalRun/
+
+# NVidia Nsight
+*.nvuser
+
+# MFractors
+.mfractor/
+
+# Visual Studio local history
+.localhistory/
+.vshistory/
+
+# Healthcheck temp db
+healthchecksdb
+
+# VS Migration backup
+MigrationBackup/
+
+# Ionide
+.ionide/
+
+# Fody
+FodyWeavers.xsd
+
+
+########################################
+# IDEs / Editors
+########################################
+
+# JetBrains
+.idea/
+*.sln.iml
+
+# Eclipse / others
+.project
+.classpath
+.c9/
+*.launch
+.settings/
+*.sublime-workspace
+
+# VS Code (keep workspace settings if needed)
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+*.code-workspace
+
+# Local History (VS Code)
+.history/
+.history/*
+
+
+########################################
+# Database files
+########################################
+*.db
+*.sqlite
+*.sqlite3
+
+
+########################################
+# Logs
+########################################
+logs/
+*.log
+
+
+########################################
+# OS / System files
+########################################
+.DS_Store
+Thumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+.AppleDouble
+.LSOverride
+
+
+########################################
+# Temporary files
+########################################
+*.swp
+*.swo
+*~
+.tmp
+*.tmp
+temp/
+tmp/

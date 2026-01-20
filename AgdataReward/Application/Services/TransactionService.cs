@@ -5,10 +5,12 @@ namespace Application.Services;
 
 public class TransactionService(
     IRewardTransactionRepository transactionRepo,
-    IRewardPointsRepository rewardPointsRepo) : ITransactionService
+    IRewardPointsRepository rewardPointsRepo,
+    IUserAccountRepository accountRepo) : ITransactionService
 {
     private readonly IRewardTransactionRepository _transactionRepo = transactionRepo;
     private readonly IRewardPointsRepository _rewardPointsRepo = rewardPointsRepo;
+    private readonly IUserAccountRepository _accountRepo = accountRepo;
 
     public async Task<RewardPoints> CreateRewardPointsAsync(int pointsValue)
     {
@@ -22,6 +24,17 @@ public class TransactionService(
         return await _rewardPointsRepo.GetByIdAsync(id);
     }
 
+    public async Task<RewardPoints> UpdateRewardPointsAsync(Guid id, int newPointsValue)
+    {
+        var rewardPoints = await _rewardPointsRepo.GetByIdAsync(id);
+        if (rewardPoints == null)
+            throw new InvalidOperationException($"RewardPoints with ID {id} not found.");
+
+        rewardPoints.UpdatePointsValue(newPointsValue);
+        await _rewardPointsRepo.UpdateAsync(rewardPoints);
+        return rewardPoints;
+    }
+
     public async Task<IEnumerable<RewardPoints>> ListRewardPointsAsync()
     {
         return await _rewardPointsRepo.ListAsync();
@@ -29,6 +42,15 @@ public class TransactionService(
 
     public async Task<IEnumerable<RewardTransaction>> GetUserTransactionsAsync(Guid userId)
     {
-        return await _transactionRepo.GetByUserIdAsync(userId);
+        // userId is UserProfile.Id, but RewardTransaction.UserId is FK to UserAccount.Id
+        // So we need to get the UserAccount first
+        var account = await _accountRepo.GetByUserIdAsync(userId);
+        if (account == null)
+        {
+            return Enumerable.Empty<RewardTransaction>();
+        }
+
+        // Now query transactions using UserAccount.Id
+        return await _transactionRepo.GetByUserIdAsync(account.Id);
     }
 }

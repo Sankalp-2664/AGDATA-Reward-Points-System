@@ -45,4 +45,10 @@ public class ProductRepository(RewardDbContext context) : IProductRepository
             await _context.SaveChangesAsync();
         }
     }
+
+    public async Task UpdateAsync(ProductInformation product)
+    {
+        _context.ProductInformations.Update(product);
+        await _context.SaveChangesAsync();
+    }
 }

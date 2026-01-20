@@ -1,0 +1,123 @@
+<div class="rewards-shell">
+  <!-- Main Content -->
+  <main class="content">
+    <div class="page-header">
+      <h1>My Rewards</h1>
+      <p class="subtitle">Track your points and redemption history</p>
+    </div>
+
+    <!-- Summary Cards -->
+    <section class="summary-cards">
+      <article class="summary-card balance">
+        <div class="summary-icon">💳</div>
+        <div class="summary-content">
+          <div class="summary-label">Current Balance</div>
+          <div class="summary-value">{{ currentBalance }}</div>
+          <div class="summary-desc">Points Available</div>
+        </div>
+      </article>
+
+      <article class="summary-card earned">
+        <div class="summary-icon">💰</div>
+        <div class="summary-content">
+          <div class="summary-label">Total Earned</div>
+          <div class="summary-value">{{ totalEarned }}</div>
+          <div class="summary-desc">Points</div>
+        </div>
+      </article>
+
+      <article class="summary-card redeemed">
+        <div class="summary-icon">🎁</div>
+        <div class="summary-content">
+          <div class="summary-label">Total Redeemed</div>
+          <div class="summary-value">{{ totalRedeemed }}</div>
+          <div class="summary-desc">Points</div>
+        </div>
+      </article>
+    </section>
+
+    <!-- Transaction Type Tabs -->
+    <div class="transaction-tabs">
+      <button 
+        class="tab-button"
+        [class.active]="selectedFilterType === 'All'"
+        (click)="selectFilterType('All')">
+        All
+      </button>
+      <button 
+        class="tab-button"
+        [class.active]="selectedFilterType === 'Earned'"
+        (click)="selectFilterType('Earned')">
+        Earned
+      </button>
+      <button 
+        class="tab-button"
+        [class.active]="selectedFilterType === 'Redeemed'"
+        (click)="selectFilterType('Redeemed')">
+        Redeemed
+      </button>
+      <button 
+        class="tab-button"
+        [class.active]="selectedFilterType === 'Pending'"
+        (click)="selectFilterType('Pending')">
+        Pending
+        <span *ngIf="totalPending > 0" class="pending-badge">{{ totalPending }}</span>
+      </button>
+      <button 
+        class="tab-button"
+        [class.active]="selectedFilterType === 'Rejected'"
+        (click)="selectFilterType('Rejected')">
+        Rejected
+        <span *ngIf="totalRejected > 0" class="rejected-badge">{{ totalRejected }}</span>
+      </button>
+    </div>
+
+    <!-- Results Count -->
+    <div class="results-info" *ngIf="filteredActivities.length > 0">
+      <span>Showing {{ filteredActivities.length }} of {{ activities.length }} transactions</span>
+    </div>
+
+    <!-- Activities List -->
+    <section class="activities-container">
+      <article 
+        *ngFor="let activity of filteredActivities" 
+        class="activity-card"
+        [ngClass]="getActivityClass(activity.type)"
+      >
+        <div class="activity-left">
+          <div class="activity-icon-circle">
+            {{ getActivityIcon(activity.type) }}
+          </div>
+          <div class="activity-details">
+            <div class="activity-description">{{ activity.description }}</div>
+            <div class="activity-meta">
+              <span class="activity-date">{{ activity.date | date:'medium' }}</span>
+              <span class="activity-type-badge">{{ activity.type }}</span>
+            </div>
+          </div>
+        </div>
+        <div 
+          class="activity-points"
+          [class.positive]="activity.type === 'earned'"
+          [class.negative]="activity.type === 'redeemed'"
+          [class.pending]="activity.type === 'pending'"
+          [class.rejected]="activity.type === 'rejected'"
+        >
+          <span class="points-sign">{{ activity.points > 0 ? '+' : '' }}</span>
+          <span class="points-value">{{ Math.abs(activity.points) }}</span>
+          <span class="points-label">pts</span>
+          <span *ngIf="activity.type === 'pending'" class="status-badge pending">Awaiting Approval</span>
+          <span *ngIf="activity.type === 'rejected'" class="status-badge rejected">Rejected</span>
+        </div>
+      </article>
+
+      <div *ngIf="filteredActivities.length === 0" class="empty-state">
+        <div class="empty-icon">📭</div>
+        <p>No transactions found matching your filters</p>
+        <button class="clear-filters-btn" (click)="clearFilters()">
+          Clear Filters
+        </button>
+      </div>
+    </section>
+  </main>
+</div>

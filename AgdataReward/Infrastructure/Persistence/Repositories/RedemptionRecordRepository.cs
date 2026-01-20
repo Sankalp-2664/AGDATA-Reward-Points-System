@@ -29,4 +29,13 @@ public class RedemptionRecordRepository(RewardDbContext context) : IRedemptionRe
             .Include(r => r.Product)
             .ToListAsync();
     }
+
+    public async Task<IEnumerable<RedemptionRecord>> GetByUserIdAsync(Guid userId)
+    {
+        return await _context.RedemptionRecords
+            .Include(r => r.User)
+            .Include(r => r.Product)
+            .Where(r => r.UserId == userId)
+            .ToListAsync();
+    }
 }

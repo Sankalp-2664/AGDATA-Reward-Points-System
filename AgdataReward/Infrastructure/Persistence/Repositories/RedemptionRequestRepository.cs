@@ -15,6 +15,12 @@ public class RedemptionRequestRepository(RewardDbContext context): IRedemptionRe
             .SingleOrDefaultAsync(r => r.Id == id);
     }
 
+    public async Task AddAsync(RedemptionRequest request)
+    {
+        await _context.RedemptionRequests.AddAsync(request);
+        await _context.SaveChangesAsync();
+    }
+
     public async Task UpdateAsync(RedemptionRequest request)
     {
         _context.RedemptionRequests.Update(request);
@@ -34,6 +40,20 @@ public class RedemptionRequestRepository(RewardDbContext context): IRedemptionRe
         return await _context.RedemptionRequests
             .Where(r => recordIds.Contains(r.RedemptionId) &&
                         (r.Status == RedemptionStatus.Pending || r.Status == RedemptionStatus.Approved))
+            .ToListAsync();
+    }
+
+    public async Task<IEnumerable<RedemptionRequest>> GetAllPendingAsync()
+    {
+        return await _context.RedemptionRequests
+            .Where(r => r.Status == RedemptionStatus.Pending)
+            .ToListAsync();
+    }
+
+    public async Task<IEnumerable<RedemptionRequest>> GetByRedemptionIdsAsync(IEnumerable<Guid> redemptionIds)
+    {
+        return await _context.RedemptionRequests
+            .Where(r => redemptionIds.Contains(r.RedemptionId))
             .ToListAsync();
     }
 }

@@ -14,9 +14,21 @@ public class RewardPointsRepository(RewardDbContext context) : IRewardPointsRepo
             .SingleOrDefaultAsync(rp => rp.Id == id);
     }
 
+    public async Task<RewardPoints?> GetByValueAsync(int pointsValue)
+    {
+        return await _context.RewardPoints
+            .FirstOrDefaultAsync(rp => rp.PointsValue == pointsValue);
+    }
+
     public async Task AddAsync(RewardPoints rewardPoints)
     {
         await _context.RewardPoints.AddAsync(rewardPoints);
+        await _context.SaveChangesAsync();
+    }
+
+    public async Task UpdateAsync(RewardPoints rewardPoints)
+    {
+        _context.RewardPoints.Update(rewardPoints);
         await _context.SaveChangesAsync();
     }
 

@@ -74,6 +74,50 @@ public class RedemptionController(IRedemptionApiService redemptionApiService) : 
     }
 
     /// <summary>
+    /// Retrieves all pending redemption requests with user and product details.
+    /// </summary>
+    /// <returns>List of pending redemption requests.</returns>
+    /// <response code="200">Pending requests returned successfully.</response>
+    /// <response code="403">Only admins can view all pending requests.</response>
+    [HttpGet("pending")]
+    [Authorize(Roles = "Admin")]
+    [ProducesResponseType(typeof(IEnumerable<PendingRedemptionDto>), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    public async Task<IActionResult> GetPendingRequests()
+    {
+        try
+        {
+            var pendingRequests = await _redemptionApiService.GetAllPendingRequestsAsync();
+            return Ok(pendingRequests);
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(new { message = ex.Message });
+        }
+    }
+
+    /// <summary>
+    /// Retrieves redemption history for a specific user.
+    /// </summary>
+    /// <param name="userId">User identifier.</param>
+    /// <returns>List of user's redemption requests.</returns>
+    /// <response code="200">Redemption history returned successfully.</response>
+    [HttpGet("user/{userId:guid}")]
+    [ProducesResponseType(typeof(IEnumerable<PendingRedemptionDto>), StatusCodes.Status200OK)]
+    public async Task<IActionResult> GetUserRedemptionHistory(Guid userId)
+    {
+        try
+        {
+            var history = await _redemptionApiService.GetUserRedemptionHistoryAsync(userId);
+            return Ok(history);
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(new { message = ex.Message });
+        }
+    }
+
+    /// <summary>
     /// Approves an existing redemption request.
     /// </summary>
     /// <param name="id">Redemption identifier.</param>

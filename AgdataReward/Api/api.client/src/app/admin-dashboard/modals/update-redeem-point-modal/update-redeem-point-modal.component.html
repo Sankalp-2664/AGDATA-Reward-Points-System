@@ -1,0 +1,32 @@
+
+<div *ngIf="isOpen" class="modal-overlay" (click)="onClose()">
+  <div class="modal-content small" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h3>Update Redeem Point Value</h3>
+      <button class="modal-close" (click)="onClose()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group">
+        <label>Redeem Point ID</label>
+        <input type="text" [value]="redeemPoint?.redeemPointId" disabled />
+      </div>
+      <div class="form-group">
+        <label>Current Value</label>
+        <input type="text" [value]="redeemPoint?.value" disabled />
+      </div>
+      <div class="form-group">
+        <label>New Value *</label>
+        <input
+          type="number"
+          [(ngModel)]="newValue"
+          placeholder="Enter value"
+          min="1"
+        />
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-cancel" (click)="onClose()">Cancel</button>
+      <button class="btn-save" (click)="onSave()">Save</button>
+    </div>
+  </div>
+</div>
